@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using System.Net;
+using System.Reflection;
 
 namespace Microsoft.DeepDev
 {
@@ -56,7 +57,8 @@ namespace Microsoft.DeepDev
                                                                 { "text-search-ada-doc-001", "r50k_base" },
                                                                 { "code-search-babbage-code-001", "r50k_base" },
                                                                 { "code-search-ada-code-001", "r50k_base" },
-
+                                                                //open source
+                                                                { "gpt2", "gpt2" }
                                                             };
 
         private const string ENDOFTEXT = "<|endoftext|>";
@@ -142,6 +144,18 @@ namespace Microsoft.DeepDev
                                             .ToDictionary(pair => pair.Key, pair => pair.Value);
                     }
                     return CreateTokenizer(regexPatternStr, mergeableRanksFileUrl, specialTokens);
+                case "gpt2":
+                    regexPatternStr = @"'s|'t|'re|'ve|'m|'ll|'d| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+";
+                    mergeableRanksFileUrl = @"gpt2.tiktoken";
+                    specialTokens = new Dictionary<string, int>{
+                                            { ENDOFTEXT, 50256 },
+                                        };
+                    if (!(extraSpecialTokens is null))
+                    {
+                        specialTokens = specialTokens.Concat(extraSpecialTokens)
+                                            .ToDictionary(pair => pair.Key, pair => pair.Value);
+                    }
+                    return CreateTokenizer(regexPatternStr, mergeableRanksFileUrl, specialTokens);
                 default:
                     throw new NotImplementedException($"Doesn't support this encoder [{encoderName}]");
 
@@ -150,10 +164,29 @@ namespace Microsoft.DeepDev
 
         }
 
+        private static string AssemblyDirectory
+        {
+            get
+            {
+                string codeBase = Assembly.GetExecutingAssembly().CodeBase;
+                UriBuilder uri = new UriBuilder(codeBase);
+                string path = Uri.UnescapeDataString(uri.Path);
+                return Path.GetDirectoryName(path);
+            }
+        }
+
         private static TikTokenizer CreateTokenizer(string regexPatternStr, string mergeableRanksFileUrl, Dictionary<string, int> specialTokens)
         {
-            using (WebClient client = new WebClient())
-            using (Stream stream = client.OpenRead(mergeableRanksFileUrl))
+            if (mergeableRanksFileUrl.StartsWith("http"))
+            {
+                using (WebClient client = new WebClient())
+                using (Stream stream = client.OpenRead(mergeableRanksFileUrl))
+                {
+                    return CreateTokenizer(stream, specialTokens, regexPatternStr);
+                }
+            }
+            var filePath = Path.Combine(AssemblyDirectory, mergeableRanksFileUrl);
+            using (FileStream stream = new FileStream(filePath, FileMode.Open))
             {
                 return CreateTokenizer(stream, specialTokens, regexPatternStr);
             }

@@ -3,3 +3,4 @@
 
 # Declare files that will always have CRLF line endings on checkout.
 *.txt text eol=lf
+*.tiktoken text eol=lf
