@@ -75,7 +75,7 @@ namespace Microsoft.DeepDev
         /// <param name="modelName">Model name</param>
         /// <param name="extraSpecialTokens">Extra special tokens other than the built-in ones for the model</param>
         /// <returns>The tokenizer</returns>
-        public static TikTokenizer CreateByModelName(string modelName, IReadOnlyDictionary<string, int>? extraSpecialTokens = null)
+        public static ITokenizer CreateByModelName(string modelName, IReadOnlyDictionary<string, int>? extraSpecialTokens = null)
         {
             var encoder = "";
             if (!MODEL_TO_ENCODING.TryGetValue(modelName, out encoder))
@@ -100,7 +100,7 @@ namespace Microsoft.DeepDev
         /// <param name="extraSpecialTokens">Extra special tokens other than the built-in ones for the encoder</param>
         /// <returns>The tokenizer</returns>
         /// <exception cref="NotImplementedException">Throws if the encoder is not supported</exception>
-        public static TikTokenizer CreateByEncoderName(string encoderName, IReadOnlyDictionary<string, int>? extraSpecialTokens = null)
+        public static ITokenizer CreateByEncoderName(string encoderName, IReadOnlyDictionary<string, int>? extraSpecialTokens = null)
         {
             switch (encoderName)
             {
@@ -197,7 +197,7 @@ namespace Microsoft.DeepDev
         /// <param name="mergeableRanksFileUrl">BPE rank file</param>
         /// <param name="specialTokens">Special tokens mapping</param>
         /// <returns>The tokenizer</returns>
-        private static TikTokenizer CreateTokenizer(string regexPatternStr, string mergeableRanksFileUrl, Dictionary<string, int> specialTokens)
+        private static ITokenizer CreateTokenizer(string regexPatternStr, string mergeableRanksFileUrl, Dictionary<string, int> specialTokens)
         {
             if (mergeableRanksFileUrl.StartsWith("http"))
             {
@@ -223,7 +223,7 @@ namespace Microsoft.DeepDev
         /// <param name="pattern">Regex pattern to break a long string</param>
         /// <param name="cacheSize">LRU cache size to cache common tokens</param>
         /// <returns>The Tokenizer</returns>
-        public static TikTokenizer CreateTokenizer(Stream tikTokenBpeFileStream, IReadOnlyDictionary<string, int> specialTokensEncoder, string pattern, int cacheSize = 8192)
+        public static ITokenizer CreateTokenizer(Stream tikTokenBpeFileStream, IReadOnlyDictionary<string, int> specialTokensEncoder, string pattern, int cacheSize = 8192)
         {
             return new TikTokenizer(tikTokenBpeFileStream, specialTokensEncoder, pattern, cacheSize);
         }

@@ -12,7 +12,7 @@ namespace TokenizerTest
     [TestClass]
     public class TikTokenizerUnitTest
     {
-        static TikTokenizer Tokenizer;
+        static ITokenizer Tokenizer;
         const string IM_START = "<|im_start|>";
         const string IM_END = "<|im_end|>";
 

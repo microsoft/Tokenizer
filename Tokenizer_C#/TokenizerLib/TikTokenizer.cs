@@ -17,7 +17,7 @@ namespace Microsoft.DeepDev
     /// in .NET runtime.
     /// Reference: https://github.com/openai/tiktoken/blob/main/src/lib.rs
     /// </summary>
-    public class TikTokenizer
+    public class TikTokenizer : ITokenizer
     {
 
         private IReadOnlyDictionary<string, int> SpecialTokensEncoder = null!;
