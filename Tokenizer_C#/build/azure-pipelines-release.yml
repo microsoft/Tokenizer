@@ -1,0 +1,80 @@
+# .NET Desktop
+# Build and run tests for .NET Desktop or Windows classic desktop solutions.
+# Add steps that publish symbols, save build artifacts, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/apps/windows/dot-net
+
+trigger:
+- main
+
+pool:
+  name: VSEngSS-MicroBuild2022-1ES
+  demands:
+  - msbuild
+  - visualstudio
+  - vstest
+
+parameters:
+  - name: SignType
+    displayName: Sign Type
+    type: string
+    default: Real
+    values:
+    - Test
+    - Real
+
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+  SignType: '${{parameters.SignType}}'
+  TeamName: DeepDev
+
+steps:
+- task: NuGetToolInstaller@1
+
+- task: MicroBuildSigningPlugin@4
+  displayName: 'Install Signing Plugin'
+  inputs:
+    signType: '$(SignType)'
+    zipSources: false
+    feedSource: 'https://devdiv.pkgs.visualstudio.com/DefaultCollection/_packaging/MicroBuildToolset/nuget/v3/index.json'
+  env:
+    TeamName: '$(TeamName)'
+
+- task: NuGetCommand@2
+  displayName: 'NuGet restore'
+  inputs:
+    restoreSolution: '$(solution)'
+    feedsToUse: config
+    nugetConfigPath: '$(System.DefaultWorkingDirectory)\Tokenizer_C#\NuGet.config'
+
+- task: VSBuild@1
+  inputs:
+    solution: '$(solution)'
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
+
+- task: VSTest@2
+  inputs:
+    testAssemblyVer2: |
+      **\*Test.dll
+      !**\obj\**
+    vsTestVersion: latest
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
+    codeCoverageEnabled: true
+    diagnosticsEnabled: true
+    runInParallel: true
+
+- task: PublishPipelineArtifact@1
+  inputs:
+    targetPath: '$(System.DefaultWorkingDirectory)\Tokenizer_C#\Tokenizer\bin\$(buildConfiguration)\'
+    artifactName: Tokenizer
+
+- task: PublishPipelineArtifact@1
+  inputs:
+    targetPath: '$(System.DefaultWorkingDirectory)\Tokenizer_C#\TokenizerLib\bin\$(buildConfiguration)\'
+    artifactName: TokenizerLib
+
+- task: MicroBuildCleanup@1
+  condition: succeededOrFailed()

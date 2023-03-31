@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Tokenizer": {
+      "commandName": "Project",
+      "commandLineArgs": "\"This is a Game\""
+    }
+  }
+}
