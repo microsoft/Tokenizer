@@ -1,6 +1,6 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Microsoft.DeepDev.TokenizerLib.Utils
 {

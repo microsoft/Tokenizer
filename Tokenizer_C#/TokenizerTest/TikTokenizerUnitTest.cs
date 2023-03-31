@@ -1,8 +1,9 @@
-﻿using Microsoft.DeepDev;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+using Microsoft.DeepDev;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using System.Collections.Generic;
-using System.Text;
 using System.IO;
 
 
