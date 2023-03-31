@@ -12,7 +12,9 @@ namespace Microsoft.DeepDev
 {
     /// <summary>
     /// This is a C# implementation of OpenAI's tiktoken implementation of
-    /// BPE, the goal is to support gpt-3.5-turbo model tokenization.
+    /// Byte pair encoding(BPE): https://en.wikipedia.org/wiki/Byte_pair_encoding,
+    /// the goal is to support context tokenization for OpenAI large language models
+    /// in .NET runtime.
     /// Reference: https://github.com/openai/tiktoken/blob/main/src/lib.rs
     /// </summary>
     public class TikTokenizer
@@ -61,6 +63,13 @@ namespace Microsoft.DeepDev
             Init(encoder, specialTokensEncoder, pattern);
         }
 
+        /// <summary>
+        /// Initialize encoders and decoders
+        /// </summary>
+        /// <param name="encoder">Map byte[] to integer token id</param>
+        /// <param name="specialTokensEncoder">Map special token string to integer token id</param>
+        /// <param name="pattern">Regex pattern to break a string into pieces before encoding</param>
+        /// <exception cref="ArgumentException">Throws if encoder and decoder entries are not matching</exception>
         private void Init(IReadOnlyDictionary<byte[], int> encoder, IReadOnlyDictionary<string, int> specialTokensEncoder, string pattern)
         {
             Encoder = encoder;
@@ -80,6 +89,12 @@ namespace Microsoft.DeepDev
             var sortedTokenBytes = Encoder.Keys.ToList();
         }
 
+        /// <summary>
+        /// Load BPE rank dictionary from a stream.
+        /// </summary>
+        /// <param name="tikTokenBpeFileStream">Stream to the BPE rank file</param>
+        /// <returns>Map of byte[] to integer token id</returns>
+        /// <exception cref="InvalidOperationException"></exception>
         private Dictionary<byte[], int> LoadTikTokenBpe(Stream tikTokenBpeFileStream)
         {
             var bpeDict = new Dictionary<byte[], int>(new ByteArrayComparer());
@@ -123,9 +138,9 @@ namespace Microsoft.DeepDev
         }
 
         /// <summary>
-        /// Encode a piece of text
+        /// Encode a string with a set of allowed special tokens that are not broken apart.
         /// </summary>
-        /// <param name="text">Text to be encoded</param>
+        /// <param name="text">String to be encoded</param>
         /// <param name="allowedSpecial">A set of special tokens could appear in the text</param>
         /// <returns>List of token ids</returns>
         public List<int> Encode(string text, IReadOnlyCollection<string> allowedSpecial)
@@ -159,6 +174,12 @@ namespace Microsoft.DeepDev
             return tokenIds;
         }
 
+        /// <summary>
+        /// Encode a special token matched through regex.
+        /// </summary>
+        /// <param name="tokenIds">The list of token ids to add the special token id</param>
+        /// <param name="nextSpecial">Regex match of the special token</param>
+        /// <returns>The start index for next special token search</returns>
         private int EncodeSpecialToken(List<int> tokenIds, Match nextSpecial)
         {
             var token = SpecialTokensEncoder[nextSpecial.Value];
@@ -166,6 +187,14 @@ namespace Microsoft.DeepDev
             return nextSpecial.Index + nextSpecial.Length;
         }
 
+        /// <summary>
+        /// Search for special token in a string
+        /// </summary>
+        /// <param name="text">String to be searched</param>
+        /// <param name="allowedSpecial">Allowed special tokens</param>
+        /// <param name="start">Start search index in the string</param>
+        /// <param name="nextSpecial">The regex match of a special token</param>
+        /// <param name="end">The index of the special token matched or the end of the text</param>
         private void FindNextSpecialToken(string text, IReadOnlyCollection<string> allowedSpecial, int start, out Match nextSpecial, out int end)
         {
             int startFind = start;
@@ -179,6 +208,13 @@ namespace Microsoft.DeepDev
             end = nextSpecial.Success ? nextSpecial.Index : text.Length;
         }
 
+        /// <summary>
+        /// Encode a string based between start and end index
+        /// </summary>
+        /// <param name="text">The original string to be encoded</param>
+        /// <param name="tokenIds">The list of token ids to add encoded token id</param>
+        /// <param name="start">Start index</param>
+        /// <param name="end">End index</param>
         private void Encode(string text, List<int> tokenIds, int start, int end)
         {
             foreach (Match match in Regex.Matches(text[start..end]))
@@ -205,6 +241,18 @@ namespace Microsoft.DeepDev
             }
         }
 
+        /// <summary>
+        /// Encode a string from start index to end index based on max token count,
+        /// trim suffix if the token count is greater than max token count
+        /// </summary>
+        /// <param name="text">The original string to be encoded</param>
+        /// <param name="tokenIds">The list of token ids to add encoded token id</param>
+        /// <param name="start">Start index</param>
+        /// <param name="end">End index</param>
+        /// <param name="maxTokenCount">Max token count</param>
+        /// <param name="tokenCount">The token count before the start index</param>
+        /// <param name="encodeLength">The encoded string length before the start index</param>
+        /// <returns>The new token count and encoded string length</returns>
         private (int TokenCount, int EncodeLength) EncodeTrimSuffix(string text, List<int> tokenIds, int start, int end, int maxTokenCount, int tokenCount, int encodeLength)
         {
             foreach (Match match in Regex.Matches(text[start..end]))

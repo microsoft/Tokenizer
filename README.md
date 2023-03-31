@@ -1,6 +1,6 @@
 # Tokenizer
 
-This repo contains a C# implementation of BPE tokenizer for OpenAI LLMs, it's based on open sourced rust implementation in the[OpenAI tiktoken](https://github.com/openai/tiktoken). The library is valuable to run tokenization in .NET environment.
+This repo contains a C# implementation of BPE tokenizer for OpenAI LLMs, it's based on open sourced rust implementation in the [OpenAI tiktoken](https://github.com/openai/tiktoken). The library is valuable to run tokenization in .NET environment.
 
 ## Contributing
 

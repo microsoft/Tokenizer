@@ -69,6 +69,12 @@ namespace Microsoft.DeepDev
         private const string FIM_SUFFIX = "<|fim_suffix|>";
         private const string ENDOFPROMPT = "<|endofprompt|>";
 
+        /// <summary>
+        /// Create tokenizer based on model name and extra special tokens
+        /// </summary>
+        /// <param name="modelName">Model name</param>
+        /// <param name="extraSpecialTokens">Extra special tokens other than the built-in ones for the model</param>
+        /// <returns>The tokenizer</returns>
         public static TikTokenizer CreateByModelName(string modelName, IReadOnlyDictionary<string, int>? extraSpecialTokens = null)
         {
             var encoder = "";
@@ -87,6 +93,13 @@ namespace Microsoft.DeepDev
 
         }
 
+        /// <summary>
+        /// Create tokenizer based on encoder name and extra special tokens
+        /// </summary>
+        /// <param name="encoderName">Encoder name</param>
+        /// <param name="extraSpecialTokens">Extra special tokens other than the built-in ones for the encoder</param>
+        /// <returns>The tokenizer</returns>
+        /// <exception cref="NotImplementedException">Throws if the encoder is not supported</exception>
         public static TikTokenizer CreateByEncoderName(string encoderName, IReadOnlyDictionary<string, int>? extraSpecialTokens = null)
         {
             switch (encoderName)
@@ -177,6 +190,13 @@ namespace Microsoft.DeepDev
             }
         }
 
+        /// <summary>
+        /// Create tokenizer based on regex pattern, BPE rank file and special tokens
+        /// </summary>
+        /// <param name="regexPatternStr">Regex pattern to break a long string</param>
+        /// <param name="mergeableRanksFileUrl">BPE rank file</param>
+        /// <param name="specialTokens">Special tokens mapping</param>
+        /// <returns>The tokenizer</returns>
         private static TikTokenizer CreateTokenizer(string regexPatternStr, string mergeableRanksFileUrl, Dictionary<string, int> specialTokens)
         {
             if (mergeableRanksFileUrl.StartsWith("http"))
@@ -194,6 +214,15 @@ namespace Microsoft.DeepDev
             }
         }
 
+        /// <summary>
+        /// Create tokenizer based on BPE rank file stream, special tokens, regex pattern and cache size
+        /// This is needed when user want to embed the BPE rank file in their assembly and pass in the stream.
+        /// </summary>
+        /// <param name="tikTokenBpeFileStream">File stream containing the BPE ranks</param>
+        /// <param name="specialTokensEncoder">Special tokens mapping</param>
+        /// <param name="pattern">Regex pattern to break a long string</param>
+        /// <param name="cacheSize">LRU cache size to cache common tokens</param>
+        /// <returns>The Tokenizer</returns>
         public static TikTokenizer CreateTokenizer(Stream tikTokenBpeFileStream, IReadOnlyDictionary<string, int> specialTokensEncoder, string pattern, int cacheSize = 8192)
         {
             return new TikTokenizer(tikTokenBpeFileStream, specialTokensEncoder, pattern, cacheSize);
