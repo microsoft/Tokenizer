@@ -55,6 +55,3 @@ steps:
   inputs:
     targetPath: '$(System.DefaultWorkingDirectory)\Tokenizer_C#\TokenizerLib\bin\$(buildConfiguration)\'
     artifactName: TokenizerLib
-
-- task: MicroBuildCleanup@1
-  condition: succeededOrFailed()
