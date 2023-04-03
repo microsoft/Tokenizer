@@ -6,6 +6,11 @@
 trigger:
 - main
 
+jobs:
+- job: Windows
+  pool:
+    vmImage: 'windows-latest'
+
 variables:
   solution: '**/*.sln'
   buildPlatform: 'Any CPU'
