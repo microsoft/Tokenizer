@@ -6,45 +6,41 @@
 trigger:
 - main
 
+jobs:
+- job: Windows
+  pool:
+    vmImage: 'windows-latest'
+
 variables:
-  solution: '**/*.sln'
-  buildPlatform: 'Any CPU'
+  workingDir: '$(System.DefaultWorkingDirectory)\Tokenizer_C#'
   buildConfiguration: 'Release'
   TeamName: DeepDev
 
 steps:
-- task: NuGetToolInstaller@1
-
-- task: NuGetCommand@2
+- task: DotNetCoreCLI@2
   inputs:
-    restoreSolution: '$(solution)'
+    command: 'restore'
     feedsToUse: config
-    nugetConfigPath: '$(System.DefaultWorkingDirectory)\Tokenizer_C#\NuGet.config'
+    nugetConfigPath: 'Tokenizer_C#/nuget.config'
+    workingDirectory: '$(workingDir)'
 
-- task: VSBuild@1
+- task: DotNetCoreCLI@2
   inputs:
-    solution: '$(solution)'
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
+    command: 'build'
+    arguments: '--configuration $(buildConfiguration)'
+    workingDirectory: '$(workingDir)'
 
-- task: VSTest@2
+- task: DotNetCoreCLI@2
   inputs:
-    testAssemblyVer2: |
-      **\*Test.dll
-      !**\obj\**
-    vsTestVersion: latest
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
-    codeCoverageEnabled: true
-    diagnosticsEnabled: true
-    runInParallel: true
+    command: 'test'
+    workingDirectory: '$(workingDir)'
 
 - task: PublishPipelineArtifact@1
   inputs:
-    targetPath: '$(System.DefaultWorkingDirectory)\Tokenizer_C#\Tokenizer\bin\$(buildConfiguration)\'
+    targetPath: '$(workingDir)\Tokenizer\bin\$(buildConfiguration)\'
     artifactName: Tokenizer
 
 - task: PublishPipelineArtifact@1
   inputs:
-    targetPath: '$(System.DefaultWorkingDirectory)\Tokenizer_C#\TokenizerLib\bin\$(buildConfiguration)\'
+    targetPath: '(workingDir)\TokenizerLib\bin\$(buildConfiguration)\'
     artifactName: TokenizerLib
