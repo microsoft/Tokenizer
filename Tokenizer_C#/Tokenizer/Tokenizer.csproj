@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <SkipStrongNameSigning>false</SkipStrongNameSigning>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TokenizerLib\TokenizerLib.csproj" />
+  </ItemGroup>
+
+</Project>

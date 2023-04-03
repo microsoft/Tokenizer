@@ -1,0 +1,46 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33012.329
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tokenizer", "Tokenizer\Tokenizer.csproj", "{7146594B-60FD-44DE-AEA5-F8A04E4804D5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TokenizerTest", "TokenizerTest\TokenizerTest.csproj", "{CA4DCA0A-F954-493D-94CA-C3613F478A28}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TokenizerLib", "TokenizerLib\TokenizerLib.csproj", "{EC774704-DA3A-4D7F-BF2C-82098F727927}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{CC4AE338-FB5D-4ED1-85D0-F1E40EE31BF4}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		build\azure-pipelines-pr.yml = build\azure-pipelines-pr.yml
+		build\azure-pipelines-release.yml = build\azure-pipelines-release.yml
+		nuget.config = nuget.config
+		build\public.snk = build\public.snk
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7146594B-60FD-44DE-AEA5-F8A04E4804D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7146594B-60FD-44DE-AEA5-F8A04E4804D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7146594B-60FD-44DE-AEA5-F8A04E4804D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7146594B-60FD-44DE-AEA5-F8A04E4804D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CA4DCA0A-F954-493D-94CA-C3613F478A28}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA4DCA0A-F954-493D-94CA-C3613F478A28}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CA4DCA0A-F954-493D-94CA-C3613F478A28}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CA4DCA0A-F954-493D-94CA-C3613F478A28}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC774704-DA3A-4D7F-BF2C-82098F727927}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC774704-DA3A-4D7F-BF2C-82098F727927}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC774704-DA3A-4D7F-BF2C-82098F727927}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC774704-DA3A-4D7F-BF2C-82098F727927}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {729E6734-ED59-4CB3-8330-9E96DD5FDC12}
+	EndGlobalSection
+EndGlobal
