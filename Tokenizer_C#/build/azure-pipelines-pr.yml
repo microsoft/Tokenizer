@@ -6,13 +6,6 @@
 trigger:
 - main
 
-pool:
-  name: VSEngSS-MicroBuild2022-1ES
-  demands:
-  - msbuild
-  - visualstudio
-  - vstest
-
 variables:
   solution: '**/*.sln'
   buildPlatform: 'Any CPU'
