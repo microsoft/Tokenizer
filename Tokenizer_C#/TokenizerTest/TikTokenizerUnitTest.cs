@@ -12,7 +12,12 @@ namespace TokenizerTest
     [TestClass]
     public class TikTokenizerUnitTest
     {
-        static ITokenizer Tokenizer;
+        private readonly ITokenizer Tokenizer;
+        private readonly ITokenizer Tokenizer_gpt2;
+        private readonly ITokenizer Tokenizer_p50k_base;
+        private readonly ITokenizer Tokenizer_r50k_base;
+        private readonly ITokenizer Tokenizer_p50k_edit;
+
         const string IM_START = "<|im_start|>";
         const string IM_END = "<|im_end|>";
 
@@ -24,6 +29,10 @@ namespace TokenizerTest
         public TikTokenizerUnitTest()
         {
             Tokenizer = TokenizerBuilder.CreateByModelName("gpt-4", SpecialTokens);
+            Tokenizer_gpt2 = TokenizerBuilder.CreateByEncoderName("gpt2");
+            Tokenizer_p50k_base = TokenizerBuilder.CreateByEncoderName("p50k_base");
+            Tokenizer_r50k_base = TokenizerBuilder.CreateByEncoderName("r50k_base");
+            Tokenizer_p50k_edit = TokenizerBuilder.CreateByEncoderName("p50k_edit");
         }
 
         [TestMethod]
@@ -193,6 +202,86 @@ namespace TokenizerTest
             Assert.AreEqual(encodedText, encoded.Text);
             var decoded = Tokenizer.Decode(encoded.TokenIds.ToArray());
             Assert.AreEqual(encodedText, decoded);
+        }
+
+        [TestMethod]
+        public void TestEncodeGpt2()
+        {
+            var text = File.ReadAllText("./testData/lib.rs.txt");
+            var encoded = Tokenizer_gpt2.Encode(text, new HashSet<string>());
+            Assert.AreEqual(11378, encoded.Count);
+
+            string json = File.ReadAllText("./testData/tokens_gpt2.json");
+            var expected = JsonConvert.DeserializeObject<int[]>(json);
+
+            for (int i = 0; i < encoded.Count; i++)
+            {
+                Assert.AreEqual(expected[i], encoded[i]);
+            }
+            Assert.AreEqual(expected.Length, encoded.Count);
+
+            var decoded = Tokenizer_gpt2.Decode(encoded.ToArray());
+            Assert.AreEqual(text, decoded);
+        }
+
+        [TestMethod]
+        public void TestEncodeP50kbase()
+        {
+            var text = File.ReadAllText("./testData/lib.rs.txt");
+            var encoded = Tokenizer_p50k_base.Encode(text, new HashSet<string>());
+            Assert.AreEqual(7230, encoded.Count);
+
+            string json = File.ReadAllText("./testData/tokens_p50k_base.json");
+            var expected = JsonConvert.DeserializeObject<int[]>(json);
+
+            for (int i = 0; i < encoded.Count; i++)
+            {
+                Assert.AreEqual(expected[i], encoded[i]);
+            }
+            Assert.AreEqual(expected.Length, encoded.Count);
+
+            var decoded = Tokenizer_p50k_base.Decode(encoded.ToArray());
+            Assert.AreEqual(text, decoded);
+        }
+
+        [TestMethod]
+        public void TestEncodeP50kedit()
+        {
+            var text = File.ReadAllText("./testData/lib.rs.txt");
+            var encoded = Tokenizer_p50k_edit.Encode(text, new HashSet<string>());
+            Assert.AreEqual(7230, encoded.Count);
+
+            string json = File.ReadAllText("./testData/tokens_p50k_edit.json");
+            var expected = JsonConvert.DeserializeObject<int[]>(json);
+
+            for (int i = 0; i < encoded.Count; i++)
+            {
+                Assert.AreEqual(expected[i], encoded[i]);
+            }
+            Assert.AreEqual(expected.Length, encoded.Count);
+
+            var decoded = Tokenizer_p50k_edit.Decode(encoded.ToArray());
+            Assert.AreEqual(text, decoded);
+        }
+
+        [TestMethod]
+        public void TestEncodeR50kbase()
+        {
+            var text = File.ReadAllText("./testData/lib.rs.txt");
+            var encoded = Tokenizer_r50k_base.Encode(text, new HashSet<string>());
+            Assert.AreEqual(11378, encoded.Count);
+
+            string json = File.ReadAllText("./testData/tokens_r50k_base.json");
+            var expected = JsonConvert.DeserializeObject<int[]>(json);
+
+            for (int i = 0; i < encoded.Count; i++)
+            {
+                Assert.AreEqual(expected[i], encoded[i]);
+            }
+            Assert.AreEqual(expected.Length, encoded.Count);
+
+            var decoded = Tokenizer_r50k_base.Decode(encoded.ToArray());
+            Assert.AreEqual(text, decoded);
         }
 
     }
