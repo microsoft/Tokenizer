@@ -5,6 +5,11 @@ namespace Microsoft.DeepDev
 {
     internal class Program
     {
+        /// <summary>
+        /// This is a console app using the TokenizerLib to perform encoding of a string
+        /// Example usage: Tokenizer.exe "gpt-3.5-turbo" "hello, world"
+        /// </summary>
+        /// <param name="args">args[0] -- model name, args[1] -- string to be encoded</param>
         static void Main(string[] args)
         {
             try
