@@ -6,41 +6,55 @@
 trigger:
 - main
 
-jobs:
-- job: Windows
-  pool:
-    vmImage: 'windows-latest'
+pool:
+  name: VSEngSS-MicroBuild2022-1ES
+  demands:
+  - msbuild
+  - visualstudio
+  - vstest
 
 variables:
-  workingDir: '$(System.DefaultWorkingDirectory)\Tokenizer_C#'
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
   TeamName: DeepDev
 
 steps:
-- task: DotNetCoreCLI@2
+- task: NuGetToolInstaller@1
+
+- task: NuGetCommand@2
   inputs:
-    command: 'restore'
+    restoreSolution: '$(solution)'
     feedsToUse: config
-    nugetConfigPath: 'Tokenizer_C#/nuget.config'
-    workingDirectory: '$(workingDir)'
+    nugetConfigPath: '$(System.DefaultWorkingDirectory)\Tokenizer_C#\NuGet.config'
 
-- task: DotNetCoreCLI@2
+- task: VSBuild@1
   inputs:
-    command: 'build'
-    arguments: '--configuration $(buildConfiguration)'
-    workingDirectory: '$(workingDir)'
+    solution: '$(solution)'
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
 
-- task: DotNetCoreCLI@2
+- task: VSTest@2
   inputs:
-    command: 'test'
-    workingDirectory: '$(workingDir)'
+    testAssemblyVer2: |
+      **\*Test.dll
+      !**\obj\**
+    vsTestVersion: latest
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
+    codeCoverageEnabled: true
+    diagnosticsEnabled: true
+    runInParallel: true
 
 - task: PublishPipelineArtifact@1
   inputs:
-    targetPath: '$(workingDir)\Tokenizer\bin\$(buildConfiguration)\'
+    targetPath: '$(System.DefaultWorkingDirectory)\Tokenizer_C#\Tokenizer\bin\$(buildConfiguration)\'
     artifactName: Tokenizer
 
 - task: PublishPipelineArtifact@1
   inputs:
-    targetPath: '(workingDir)\TokenizerLib\bin\$(buildConfiguration)\'
+    targetPath: '$(System.DefaultWorkingDirectory)\Tokenizer_C#\TokenizerLib\bin\$(buildConfiguration)\'
     artifactName: TokenizerLib
+
+- task: MicroBuildCleanup@1
+  condition: succeededOrFailed()
