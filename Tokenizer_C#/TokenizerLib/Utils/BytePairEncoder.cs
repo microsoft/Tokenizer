@@ -4,6 +4,9 @@ using System.Collections.Generic;
 
 namespace Microsoft.DeepDev.TokenizerLib.Utils
 {
+    /// <summary>
+    /// This class implements the byte pair encoding algorithm.
+    /// </summary>
     internal class BytePairEncoder
     {
 

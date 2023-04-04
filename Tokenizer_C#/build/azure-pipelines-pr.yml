@@ -6,10 +6,12 @@
 trigger:
 - main
 
-jobs:
-- job: Windows
-  pool:
-    vmImage: 'windows-latest'
+pool:
+  name: VSEngSS-MicroBuild2022-1ES
+  demands:
+  - msbuild
+  - visualstudio
+  - vstest
 
 variables:
   solution: '**/*.sln'
@@ -53,3 +55,6 @@ steps:
   inputs:
     targetPath: '$(System.DefaultWorkingDirectory)\Tokenizer_C#\TokenizerLib\bin\$(buildConfiguration)\'
     artifactName: TokenizerLib
+
+- task: MicroBuildCleanup@1
+  condition: succeededOrFailed()
