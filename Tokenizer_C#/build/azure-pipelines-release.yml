@@ -84,7 +84,7 @@ steps:
   inputs:
     command: push
     nuGetFeedType: external
-    publishFeedCredentials: nuget.org
+    publishFeedCredentials: Tokenizer
     packagesToPush: '$(System.DefaultWorkingDirectory)\Tokenizer_C#\TokenizerLib\bin\$(buildConfiguration)\*.nupkg'
 
 - task: MicroBuildCleanup@1
