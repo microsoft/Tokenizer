@@ -4,10 +4,7 @@
 # https://docs.microsoft.com/azure/devops/pipelines/apps/windows/dot-net
 
 trigger:
-  batch: true
-  branches:
-    include:
-    - main
+- main
 
 pool:
   name: VSEngSS-MicroBuild2022-1ES
