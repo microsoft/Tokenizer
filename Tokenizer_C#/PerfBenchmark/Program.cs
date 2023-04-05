@@ -17,8 +17,8 @@ namespace PerfBenchmark
             using (StreamReader sr = new StreamReader("data/words.txt"))
             {
                 // Read the file line by line and display each line.
-                string line;
-                while ((line = sr.ReadLine()) != null)
+                string? line;
+                while (!((line = sr.ReadLine()) is null))
                 {
                     Words.Add(line);
                 }
