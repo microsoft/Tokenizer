@@ -4,7 +4,9 @@ This repo contains a C# implementation of byte pair encoding(BPE) tokenizer for 
 
 The TokenizerLib is built in .NET Standard 2.0, which can be consumed in projects on any version of .NET later than .NET Core 2.0 or .NET Framework 4.6.1.
 
-Sample code to use TokenizerLib in your code:
+You can download and install the nuget package of TokenizerLib [here](https://www.nuget.org/packages/Microsoft.DeepDev.TokenizerLib/).
+
+Example C# code to use TokenizerLib in your code:
 ```csharp
 using System.Collections.Generic;
 using Microsoft.DeepDev;
