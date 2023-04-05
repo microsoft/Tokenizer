@@ -42,7 +42,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<FilesToSign Include="$(OutDir)\TokenizerLib.dll">
+		<FilesToSign Include="$(OutDir)\Microsoft.DeepDev.TokenizerLib.dll">
 			<Authenticode>Microsoft400</Authenticode>
 			<StrongName>StrongName</StrongName>
 		</FilesToSign>
