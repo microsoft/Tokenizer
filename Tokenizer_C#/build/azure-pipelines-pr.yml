@@ -58,5 +58,10 @@ steps:
     targetPath: '$(System.DefaultWorkingDirectory)\Tokenizer_C#\TokenizerLib\bin\$(buildConfiguration)\'
     artifactName: TokenizerLib
 
+- task: PublishPipelineArtifact@1
+  inputs:
+    targetPath: '$(System.DefaultWorkingDirectory)\Tokenizer_C#\PerfBenchmark\bin\$(buildConfiguration)\'
+    artifactName: PerfBenchmark
+
 - task: MicroBuildCleanup@1
   condition: succeededOrFailed()
