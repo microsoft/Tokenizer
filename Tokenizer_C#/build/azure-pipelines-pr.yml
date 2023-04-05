@@ -6,7 +6,7 @@
 pr:
   branches:
     include:
-    - '*'
+    - main
 
 pool:
   name: VSEngSS-MicroBuild2022-1ES
