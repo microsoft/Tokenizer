@@ -27,6 +27,7 @@
 		<AssemblyName>Microsoft.DeepDev.TokenizerLib</AssemblyName>
 		<RootNamespace>Microsoft.DeepDev.TokenizerLib</RootNamespace>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 	</PropertyGroup>
 	<Target Name="IncludePDBsInPackage" Condition="'$(IncludeBuildOutput)' != 'false'">
 		<ItemGroup>
@@ -49,7 +50,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <EmbeddedResource Include="..\..\LICENSE" Link="LICENSE" />
+		<None Include="..\..\LICENSE">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
 	</ItemGroup>
 
 	<ItemGroup>
