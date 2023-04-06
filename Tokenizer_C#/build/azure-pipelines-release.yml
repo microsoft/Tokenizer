@@ -4,10 +4,7 @@
 # https://docs.microsoft.com/azure/devops/pipelines/apps/windows/dot-net
 
 trigger:
-  batch: true
-  branches:
-    include:
-    - main
+- main
 
 pool:
   name: VSEngSS-MicroBuild2022-1ES
@@ -79,13 +76,18 @@ steps:
     targetPath: '$(System.DefaultWorkingDirectory)\Tokenizer_C#\TokenizerLib\bin\$(buildConfiguration)\'
     artifactName: TokenizerLib
 
-- task: NuGetCommand@2
-  displayName: 'NuGet push'
+- task: PublishPipelineArtifact@1
   inputs:
-    command: push
-    nuGetFeedType: external
-    publishFeedCredentials: Tokenizer
-    packagesToPush: '$(System.DefaultWorkingDirectory)\Tokenizer_C#\TokenizerLib\bin\$(buildConfiguration)\*.nupkg'
+    targetPath: '$(System.DefaultWorkingDirectory)\Tokenizer_C#\PerfBenchmark\bin\$(buildConfiguration)\'
+    artifactName: PerfBenchmark
+
+#- task: NuGetCommand@2
+#  displayName: 'NuGet push'
+#  inputs:
+#    command: push
+#    nuGetFeedType: external
+#    publishFeedCredentials: Tokenizer
+#    packagesToPush: '$(System.DefaultWorkingDirectory)\Tokenizer_C#\TokenizerLib\bin\$(buildConfiguration)\*.nupkg'
 
 - task: MicroBuildCleanup@1
   condition: succeededOrFailed()
