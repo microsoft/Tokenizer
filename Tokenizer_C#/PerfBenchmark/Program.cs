@@ -9,7 +9,7 @@ namespace PerfBenchmark
     {
         private List<String> Words;
         private readonly string data;
-        private readonly ITokenizer Tokenizer = TokenizerBuilder.CreateByModelName("gpt-4");
+        private ITokenizer Tokenizer;
 
         public Tokenization()
         {
@@ -31,6 +31,11 @@ namespace PerfBenchmark
         [Benchmark]
         public List<int> Encode() => Tokenizer.Encode(data, new HashSet<string>());
 
+        [GlobalSetup]
+        public async Task GlobalSetup()
+        {
+            this.Tokenizer = await TokenizerBuilder.CreateByModelNameAsync("gpt-4");
+        }
     }
 
     public class Program

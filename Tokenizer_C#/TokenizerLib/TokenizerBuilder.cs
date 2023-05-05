@@ -6,6 +6,8 @@ using System.Linq;
 using System.IO;
 using System.Net;
 using System.Reflection;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace Microsoft.DeepDev
 {
@@ -69,13 +71,15 @@ namespace Microsoft.DeepDev
         private const string FIM_SUFFIX = "<|fim_suffix|>";
         private const string ENDOFPROMPT = "<|endofprompt|>";
 
+        private static readonly HttpClient _httpClient = new HttpClient();
+
         /// <summary>
         /// Create tokenizer based on model name and extra special tokens
         /// </summary>
         /// <param name="modelName">Model name</param>
         /// <param name="extraSpecialTokens">Extra special tokens other than the built-in ones for the model</param>
         /// <returns>The tokenizer</returns>
-        public static ITokenizer CreateByModelName(string modelName, IReadOnlyDictionary<string, int>? extraSpecialTokens = null)
+        public static async Task<ITokenizer> CreateByModelNameAsync(string modelName, IReadOnlyDictionary<string, int>? extraSpecialTokens = null)
         {
             var encoder = "";
             if (!MODEL_TO_ENCODING.TryGetValue(modelName, out encoder))
@@ -89,7 +93,7 @@ namespace Microsoft.DeepDev
                     }
                 }
             }
-            return CreateByEncoderName(encoder, extraSpecialTokens);
+            return await CreateByEncoderNameAsync(encoder, extraSpecialTokens);
 
         }
 
@@ -100,7 +104,7 @@ namespace Microsoft.DeepDev
         /// <param name="extraSpecialTokens">Extra special tokens other than the built-in ones for the encoder</param>
         /// <returns>The tokenizer</returns>
         /// <exception cref="NotImplementedException">Throws if the encoder is not supported</exception>
-        public static ITokenizer CreateByEncoderName(string encoderName, IReadOnlyDictionary<string, int>? extraSpecialTokens = null)
+        public static async Task<ITokenizer> CreateByEncoderNameAsync(string encoderName, IReadOnlyDictionary<string, int>? extraSpecialTokens = null)
         {
             switch (encoderName)
             {
@@ -119,7 +123,7 @@ namespace Microsoft.DeepDev
                         specialTokens = specialTokens.Concat(extraSpecialTokens)
                                             .ToDictionary(pair => pair.Key, pair => pair.Value);
                     }
-                    return CreateTokenizer(regexPatternStr, mergeableRanksFileUrl, specialTokens);
+                    return await CreateTokenizerAsync(regexPatternStr, mergeableRanksFileUrl, specialTokens);
                 case "p50k_base":
                     regexPatternStr = @"'s|'t|'re|'ve|'m|'ll|'d| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+";
                     mergeableRanksFileUrl = @"https://openaipublic.blob.core.windows.net/encodings/p50k_base.tiktoken";
@@ -131,7 +135,7 @@ namespace Microsoft.DeepDev
                         specialTokens = specialTokens.Concat(extraSpecialTokens)
                                             .ToDictionary(pair => pair.Key, pair => pair.Value);
                     }
-                    return CreateTokenizer(regexPatternStr, mergeableRanksFileUrl, specialTokens);
+                    return await CreateTokenizerAsync(regexPatternStr, mergeableRanksFileUrl, specialTokens);
                 case "p50k_edit":
                     regexPatternStr = @"'s|'t|'re|'ve|'m|'ll|'d| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+";
                     mergeableRanksFileUrl = @"https://openaipublic.blob.core.windows.net/encodings/p50k_base.tiktoken";
@@ -146,7 +150,7 @@ namespace Microsoft.DeepDev
                         specialTokens = specialTokens.Concat(extraSpecialTokens)
                                             .ToDictionary(pair => pair.Key, pair => pair.Value);
                     }
-                    return CreateTokenizer(regexPatternStr, mergeableRanksFileUrl, specialTokens);
+                    return await CreateTokenizerAsync(regexPatternStr, mergeableRanksFileUrl, specialTokens);
                 case "r50k_base":
                     regexPatternStr = @"'s|'t|'re|'ve|'m|'ll|'d| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+";
                     mergeableRanksFileUrl = @"https://openaipublic.blob.core.windows.net/encodings/r50k_base.tiktoken";
@@ -158,7 +162,7 @@ namespace Microsoft.DeepDev
                         specialTokens = specialTokens.Concat(extraSpecialTokens)
                                             .ToDictionary(pair => pair.Key, pair => pair.Value);
                     }
-                    return CreateTokenizer(regexPatternStr, mergeableRanksFileUrl, specialTokens);
+                    return await CreateTokenizerAsync(regexPatternStr, mergeableRanksFileUrl, specialTokens);
                 case "gpt2":
                     regexPatternStr = @"'s|'t|'re|'ve|'m|'ll|'d| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+";
                     mergeableRanksFileUrl = @"gpt2.tiktoken";
@@ -170,7 +174,7 @@ namespace Microsoft.DeepDev
                         specialTokens = specialTokens.Concat(extraSpecialTokens)
                                             .ToDictionary(pair => pair.Key, pair => pair.Value);
                     }
-                    return CreateTokenizer(regexPatternStr, mergeableRanksFileUrl, specialTokens);
+                    return await CreateTokenizerAsync(regexPatternStr, mergeableRanksFileUrl, specialTokens);
                 default:
                     throw new NotImplementedException($"Doesn't support this encoder [{encoderName}]");
 
@@ -197,12 +201,11 @@ namespace Microsoft.DeepDev
         /// <param name="mergeableRanksFileUrl">BPE rank file</param>
         /// <param name="specialTokens">Special tokens mapping</param>
         /// <returns>The tokenizer</returns>
-        private static ITokenizer CreateTokenizer(string regexPatternStr, string mergeableRanksFileUrl, Dictionary<string, int> specialTokens)
+        private static async Task<ITokenizer> CreateTokenizerAsync(string regexPatternStr, string mergeableRanksFileUrl, Dictionary<string, int> specialTokens)
         {
             if (mergeableRanksFileUrl.StartsWith("http"))
             {
-                using (WebClient client = new WebClient())
-                using (Stream stream = client.OpenRead(mergeableRanksFileUrl))
+                using (Stream stream = await _httpClient.GetStreamAsync(mergeableRanksFileUrl))
                 {
                     return CreateTokenizer(stream, specialTokens, regexPatternStr);
                 }
