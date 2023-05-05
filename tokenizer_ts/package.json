@@ -1,0 +1,32 @@
+{
+  "name": "tiktokenizer",
+  "displayName": "tiktokenizer",
+  "description": "Tokenizer for OpenAI large language models.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Microsoft Corp."
+  },
+  "license": "MIT",
+  "repository": {
+    "url": "https://github.com/Microsoft/Tokenizer"
+  },
+  "bugs": {
+		"url": "https://github.com/Microsoft/Tokenizer/issues"
+	},
+  "devDependencies": {
+    "@github/prettier-config": "^0.0.4",
+    "@types/mocha": "^5.2.7",
+    "@types/node": "^14.14.35",
+    "@types/node-fetch": "^2.5.10",
+    "mocha": "^10.1.0"
+  },
+  "scripts": {
+    "test": "mocha -u tdd --require ts-node/register test/**/*.ts",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "lru-cache": "^9.1.1",
+    "node-fetch": "^2.6.1",
+    "ts-node": "^10.9.1"
+  }
+}
