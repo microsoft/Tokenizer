@@ -1,5 +1,5 @@
 {
-  "name": "tiktokenizer",
+  "name": "@microsoft/tiktokenizer",
   "displayName": "tiktokenizer",
   "description": "Tokenizer for OpenAI large language models.",
   "version": "1.0.0",
@@ -8,25 +8,35 @@
   },
   "license": "MIT",
   "repository": {
-    "url": "https://github.com/Microsoft/Tokenizer"
+    "type": "git",
+    "url": "https://github.com/Microsoft/Tokenizer",
+    "directory": "tokenizer_ts"
   },
   "bugs": {
-		"url": "https://github.com/Microsoft/Tokenizer/issues"
-	},
+    "url": "https://github.com/Microsoft/Tokenizer/issues"
+  },
+  "main": "dist/src/index.js",
   "devDependencies": {
-    "@github/prettier-config": "^0.0.4",
     "@types/mocha": "^5.2.7",
     "@types/node": "^14.14.35",
     "@types/node-fetch": "^2.5.10",
-    "mocha": "^10.1.0"
+    "mocha": "^10.1.0",
+    "ts-node": "^10.9.1",
+    "@typescript-eslint/eslint-plugin": "^4.14.1",
+    "@typescript-eslint/parser": "^4.14.1",
+    "eslint": "^7.19.0",
+    "eslint-config-prettier": "^7.1.0",
+    "eslint-plugin-prettier": "^3.3.1",
+    "prettier": "^1.19.1"
   },
   "scripts": {
     "test": "mocha -u tdd --require ts-node/register test/**/*.ts",
-    "build": "tsc"
+    "build": "tsc -p ./tsconfig.json",
+    "eslint": "eslint src --ext ts",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\""
   },
   "dependencies": {
     "lru-cache": "^9.1.1",
-    "node-fetch": "^2.6.1",
-    "ts-node": "^10.9.1"
+    "node-fetch": "^2.6.1"
   }
 }

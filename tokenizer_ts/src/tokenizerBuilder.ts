@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import fetch from 'node-fetch';
-import * as fs from 'fs';
-import { TikTokenizer } from './tikTokenizer';
+import fetch from "node-fetch";
+import * as fs from "fs";
+import { TikTokenizer } from "./tikTokenizer";
 
 const MODEL_PREFIX_TO_ENCODING: ReadonlyMap<string, string> = new Map([
   // chat
   ["gpt-4-", "cl100k_base"], // e.g., gpt-4-0314, etc., plus gpt-4-32k
-  ["gpt-3.5-turbo-", "cl100k_base"], // e.g, gpt-3.5-turbo-0301, -0401, etc.
+  ["gpt-3.5-turbo-", "cl100k_base"] // e.g, gpt-3.5-turbo-0301, -0401, etc.
 ]);
 
 const MODEL_TO_ENCODING: ReadonlyMap<string, string> = new Map([
@@ -50,7 +50,7 @@ const MODEL_TO_ENCODING: ReadonlyMap<string, string> = new Map([
   ["code-search-babbage-code-001", "r50k_base"],
   ["code-search-ada-code-001", "r50k_base"],
   // open source
-  ["gpt2", "gpt2"],
+  ["gpt2", "gpt2"]
 ]);
 
 const ENDOFTEXT: string = "<|endoftext|>";
@@ -60,10 +60,11 @@ const FIM_SUFFIX: string = "<|fim_suffix|>";
 const ENDOFPROMPT: string = "<|endofprompt|>";
 
 //regex pattern used before gpt-3.5-turbo
-const REGEX_PATTERN_1: string = "'s|'t|'re|'ve|'m|'ll|'d| ?\\p{L}+| ?\\p{N}+| ?[^\\s\\p{L}\\p{N}]+|\\s+(?!\\S)|\\s+";
+const REGEX_PATTERN_1: string =
+  "'s|'t|'re|'ve|'m|'ll|'d| ?\\p{L}+| ?\\p{N}+| ?[^\\s\\p{L}\\p{N}]+|\\s+(?!\\S)|\\s+";
 //regex pattern used after gpt-3.5-turbo
-const REGEX_PATTERN_2: string = "(?:'s|'S|'t|'T|'re|'RE|'Re|'eR|'ve|'VE|'vE|'Ve|'m|'M|'ll|'lL|'Ll|'LL|'d|'D)|[^\\r\\n\\p{L}\\p{N}]?\\p{L}+|\\p{N}{1,3}| ?[^\\s\\p{L}\\p{N}]+[\\r\\n]*|\\s*[\\r\\n]+|\\s+(?!\\S)|\\s+";
-
+const REGEX_PATTERN_2: string =
+  "(?:'s|'S|'t|'T|'re|'RE|'Re|'eR|'ve|'VE|'vE|'Ve|'m|'M|'ll|'lL|'Ll|'LL|'d|'D)|[^\\r\\n\\p{L}\\p{N}]?\\p{L}+|\\p{N}{1,3}| ?[^\\s\\p{L}\\p{N}]+[\\r\\n]*|\\s*[\\r\\n]+|\\s+(?!\\S)|\\s+";
 
 function getFilenameFromUrl(url: string): string {
   const parts = url.split("/");
@@ -91,10 +92,10 @@ function getEncoderFromModelName(modelName: string): string {
  * @param encoder encoder name
  * @returns Map<string, number> special tokens mapping
  */
-export function getSpecialTokensByEncoder(encoder: string): Map<string, number> {
-  let specialTokens: Map<string, number> = new Map([
-    [ENDOFTEXT, 50256]
-  ]);
+export function getSpecialTokensByEncoder(
+  encoder: string
+): Map<string, number> {
+  let specialTokens: Map<string, number> = new Map([[ENDOFTEXT, 50256]]);
   switch (encoder) {
     case "cl100k_base":
       specialTokens = new Map([
@@ -102,7 +103,7 @@ export function getSpecialTokensByEncoder(encoder: string): Map<string, number> 
         [FIM_PREFIX, 100258],
         [FIM_MIDDLE, 100259],
         [FIM_SUFFIX, 100260],
-        [ENDOFPROMPT, 100276],
+        [ENDOFPROMPT, 100276]
       ]);
       break;
     case "p50k_edit":
@@ -124,9 +125,13 @@ export function getSpecialTokensByEncoder(encoder: string): Map<string, number> 
  * @param modelName model name
  * @returns Map<string, number> special tokens mapping
  */
-export function getSpecialTokensByModel(modelName: string): Map<string, number> {
+export function getSpecialTokensByModel(
+  modelName: string
+): Map<string, number> {
   let encoderName = getEncoderFromModelName(modelName);
-  let specialTokens: Map<string, number> = getSpecialTokensByEncoder(encoderName);
+  let specialTokens: Map<string, number> = getSpecialTokensByEncoder(
+    encoderName
+  );
   return specialTokens;
 }
 
@@ -135,20 +140,31 @@ export function getSpecialTokensByModel(modelName: string): Map<string, number> 
  * @param modelName model name
  * @param extraSpecialTokens extra special tokens
  */
-export async function createByModelName(modelName: string, extraSpecialTokens: ReadonlyMap<string, number> | null = null): Promise<TikTokenizer> {
-  return createByEncoderName(getEncoderFromModelName(modelName), extraSpecialTokens);
+export async function createByModelName(
+  modelName: string,
+  extraSpecialTokens: ReadonlyMap<string, number> | null = null
+): Promise<TikTokenizer> {
+  return createByEncoderName(
+    getEncoderFromModelName(modelName),
+    extraSpecialTokens
+  );
 }
 
 /**
  * Create a tokenizer from an encoder name
  * @param encoderName encoder name
- * @param extraSpecialTokens extra special tokens 
+ * @param extraSpecialTokens extra special tokens
  * @returns TikTokenizer tokenizer
  */
-export async function createByEncoderName(encoderName: string, extraSpecialTokens: ReadonlyMap<string, number> | null = null): Promise<TikTokenizer> {
+export async function createByEncoderName(
+  encoderName: string,
+  extraSpecialTokens: ReadonlyMap<string, number> | null = null
+): Promise<TikTokenizer> {
   let regexPattern: string;
   let mergeableRanksFileUrl: string;
-  let specialTokens: Map<string, number> = getSpecialTokensByEncoder(encoderName);
+  let specialTokens: Map<string, number> = getSpecialTokensByEncoder(
+    encoderName
+  );
 
   switch (encoderName) {
     case "cl100k_base":
@@ -180,16 +196,19 @@ export async function createByEncoderName(encoderName: string, extraSpecialToken
   }
 
   let fileName = getFilenameFromUrl(mergeableRanksFileUrl);
-  await fetch(mergeableRanksFileUrl).then(response => {
-    if (response.ok) {
-      return response.text();
-    } else {
-      throw new Error(`Failed to fetch file from ${mergeableRanksFileUrl}. Status code: ${response.status}`);
-    }
-  })
+  await fetch(mergeableRanksFileUrl)
+    .then(response => {
+      if (response.ok) {
+        return response.text();
+      } else {
+        throw new Error(
+          `Failed to fetch file from ${mergeableRanksFileUrl}. Status code: ${response.status}`
+        );
+      }
+    })
     .then(text => {
       fs.writeFileSync(fileName, text);
-    })
+    });
 
   return createTokenizer(fileName, specialTokens, regexPattern);
 }
@@ -202,7 +221,17 @@ export async function createByEncoderName(encoderName: string, extraSpecialToken
  * @param cacheSize cache size
  * @returns TikTokenizer tokenizer
  */
-export function createTokenizer(tikTokenBpeFile: string, specialTokensEncoder: ReadonlyMap<string, number>, regexPattern: string, cacheSize: number = 8192): TikTokenizer {
-  const tikTokenizer = new TikTokenizer(tikTokenBpeFile, specialTokensEncoder, regexPattern, cacheSize);
+export function createTokenizer(
+  tikTokenBpeFile: string,
+  specialTokensEncoder: ReadonlyMap<string, number>,
+  regexPattern: string,
+  cacheSize: number = 8192
+): TikTokenizer {
+  const tikTokenizer = new TikTokenizer(
+    tikTokenBpeFile,
+    specialTokensEncoder,
+    regexPattern,
+    cacheSize
+  );
   return tikTokenizer;
 }
