@@ -348,7 +348,7 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
-*.js
-*.map
+
+# For files in tokenizer_ts
 /tokenizer_ts/dist
 *.tiktoken
