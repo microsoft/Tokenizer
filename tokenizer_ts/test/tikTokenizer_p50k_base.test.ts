@@ -3,7 +3,7 @@
 
 import * as assert from "assert";
 import * as fs from "fs";
-import { suite, beforeEach } from "mocha";
+import { suite, before } from "mocha";
 import { createByEncoderName } from "../src/tokenizerBuilder";
 import { TikTokenizer } from "../src/tikTokenizer";
 const IM_START = "<|im_start|>";
@@ -15,7 +15,7 @@ const specialTokens: ReadonlyMap<string, number> = new Map([
 
 suite("TikTokenizer p50k_base Test Suite", function() {
   let tokenizer_p50k_base: TikTokenizer;
-  beforeEach(async () => {
+  before(async () => {
     tokenizer_p50k_base = await createByEncoderName("p50k_base", specialTokens);
   });
 

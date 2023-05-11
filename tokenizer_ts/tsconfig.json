@@ -7,7 +7,7 @@
             "DOM"
         ],
         "sourceMap": true,
-        "rootDir": ".",
+        "rootDir": "src",
         "strict": true,
         "noUnusedLocals": true,
         "outDir": "dist",

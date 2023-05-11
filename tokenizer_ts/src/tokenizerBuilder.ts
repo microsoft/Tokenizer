@@ -12,7 +12,7 @@ const MODEL_PREFIX_TO_ENCODING: ReadonlyMap<string, string> = new Map([
   ["gpt-3.5-turbo-", "cl100k_base"] // e.g, gpt-3.5-turbo-0301, -0401, etc.
 ]);
 
-const MODEL_TO_ENCODING: ReadonlyMap<string, string> = new Map([
+export const MODEL_TO_ENCODING: ReadonlyMap<string, string> = new Map([
   // chat
   ["gpt-4", "cl100k_base"],
   ["gpt-3.5-turbo", "cl100k_base"],
@@ -60,18 +60,17 @@ const FIM_MIDDLE: string = "<|fim_middle|>";
 const FIM_SUFFIX: string = "<|fim_suffix|>";
 const ENDOFPROMPT: string = "<|endofprompt|>";
 
-//regex pattern used before gpt-3.5-turbo
+/*
+ * regex pattern used before gpt-3.5-turbo
+ */
 const REGEX_PATTERN_1: string =
   "'s|'t|'re|'ve|'m|'ll|'d| ?\\p{L}+| ?\\p{N}+| ?[^\\s\\p{L}\\p{N}]+|\\s+(?!\\S)|\\s+";
-//regex pattern used after gpt-3.5-turbo
+
+/*
+ * regex pattern used after gpt-3.5-turbo
+ */
 const REGEX_PATTERN_2: string =
   "(?:'s|'S|'t|'T|'re|'RE|'Re|'eR|'ve|'VE|'vE|'Ve|'m|'M|'ll|'lL|'Ll|'LL|'d|'D)|[^\\r\\n\\p{L}\\p{N}]?\\p{L}+|\\p{N}{1,3}| ?[^\\s\\p{L}\\p{N}]+[\\r\\n]*|\\s*[\\r\\n]+|\\s+(?!\\S)|\\s+";
-
-function getFilenameFromUrl(url: string): string {
-  const parts = url.split("/");
-  const filename = parts[parts.length - 1];
-  return filename;
-}
 
 function getEncoderFromModelName(modelName: string): string {
   let encoder = "";
@@ -153,6 +152,32 @@ export function getSpecialTokensByModel(
 }
 
 /**
+ * Get the regex pattern from the encoder name
+ * @param encoder encoder name
+ * @returns string regex pattern
+ */
+export function getRegexByEncoder(encoder: string): string {
+  switch (encoder) {
+    case "cl100k_base":
+      return REGEX_PATTERN_2;
+    default:
+      break;
+  }
+  return REGEX_PATTERN_1;
+}
+
+/**
+ * Get the regex pattern from the model name
+ * @param modelName model name
+ * @returns string regex pattern
+ */
+export function getRegexByModel(modelName: string): string {
+  let encoderName = getEncoderFromModelName(modelName);
+  let regexPattern: string = getRegexByEncoder(encoderName);
+  return regexPattern;
+}
+
+/**
  * Create a tokenizer from a model name
  * @param modelName model name
  * @param extraSpecialTokens extra special tokens
@@ -212,18 +237,20 @@ export async function createByEncoderName(
     specialTokens = new Map([...specialTokens, ...extraSpecialTokens]);
   }
 
-  const fileName = getFilenameFromUrl(mergeableRanksFileUrl);
+  const fileName = path.basename(mergeableRanksFileUrl);
   const dirPath = path.resolve(__dirname, "..", "model");
   // Create the directory if it doesn't exist
   if (!fs.existsSync(dirPath)) {
     fs.mkdirSync(dirPath, { recursive: true });
   }
+  const filePath = path.resolve(dirPath, fileName);
+  if (!fs.existsSync(filePath)) {
+    console.log(`Downloading file from ${mergeableRanksFileUrl}`);
+    await fetchAndSaveFile(mergeableRanksFileUrl, filePath);
+    console.log(`Saved file to ${filePath}`);
+  }
 
-  await fetchAndSaveFile(
-    mergeableRanksFileUrl,
-    path.resolve(dirPath, fileName)
-  );
-  return createTokenizer(fileName, specialTokens, regexPattern);
+  return createTokenizer(filePath, specialTokens, regexPattern);
 }
 
 /**

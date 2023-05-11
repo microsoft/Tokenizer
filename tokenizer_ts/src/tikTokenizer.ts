@@ -130,7 +130,7 @@ export class TikTokenizer {
     let nextSpecial: RegExpMatchArray | null = null;
     if (allowedSpecial && this.specialTokensRegex) {
       while (true) {
-        nextSpecial = this.specialTokensRegex.exec(text.slice(startFind));
+        nextSpecial = text.slice(startFind).match(this.specialTokensRegex);
         if (!nextSpecial) {
           break;
         }
@@ -196,8 +196,12 @@ export class TikTokenizer {
     start: number,
     end: number
   ): void {
-    let match: RegExpExecArray | null | undefined;
-    while ((match = this.regex?.exec(text.slice(start, end))) !== null) {
+    let match: RegExpMatchArray | null | undefined;
+    const matches = Array.from(
+      text.substring(start, end).matchAll(this.regex!)
+    );
+    for (var i = 0; i < matches.length; i++) {
+      match = matches[i];
       if (match === undefined) {
         break;
       }
@@ -227,8 +231,12 @@ export class TikTokenizer {
     tokenCount: number,
     encodeLength: number
   ): { tokenCount: number; encodeLength: number } {
-    let match: RegExpExecArray | null | undefined;
-    while ((match = this.regex?.exec(text.substring(start, end)))) {
+    let match: RegExpMatchArray | null | undefined;
+    const matches = Array.from(
+      text.substring(start, end).matchAll(this.regex!)
+    );
+    for (var i = 0; i < matches.length; i++) {
+      match = matches[i];
       const piece = match[0];
       if (this.cache.has(piece)) {
         let tokens = this.cache.get(piece);
@@ -267,6 +275,7 @@ export class TikTokenizer {
         break;
       }
     }
+
     return { tokenCount, encodeLength };
   }
 
@@ -369,8 +378,12 @@ export class TikTokenizer {
       );
 
       if (end > start) {
-        let match: RegExpExecArray | null | undefined;
-        while ((match = this.regex?.exec(text.substring(start, end)))) {
+        let match: RegExpMatchArray | null | undefined;
+        const matches = Array.from(
+          text.substring(start, end).matchAll(this.regex!)
+        );
+        for (var i = 0; i < matches.length; i++) {
+          match = matches[i];
           const piece = match[0];
 
           if (this.cache.has(piece)) {
