@@ -54,7 +54,7 @@ suite("TikTokenizer Test Suite", function() {
     assert.strictEqual(tokenizer.decode(encoded), str);
   });
 
-  test("special tokens - 3", () => {
+  test("special tokens with unicode", () => {
     const str = "<|im_start|>Hello ⭐ World<|im_end|>";
     let encoded = tokenizer.encode(str, Array.from(specialTokens.keys()));
     assert.deepStrictEqual(encoded, [100264, 9906, 2928, 99834, 4435, 100265]);
@@ -199,7 +199,7 @@ suite("TikTokenizer Test Suite", function() {
 
   test("tokenize source code - gpt-3.5", done => {
     const source = fs.readFileSync("test/testdata/lib.rs.txt", "utf8");
-    const filePath = "test/testdata/tokens.json";
+    const filePath = "test/testdata/tokens_gpt_3.5_turbo.json";
 
     fs.readFile(filePath, "utf8", (err, data) => {
       assert.strictEqual(err, null);

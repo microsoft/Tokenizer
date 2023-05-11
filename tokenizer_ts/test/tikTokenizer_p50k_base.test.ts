@@ -19,8 +19,8 @@ suite("TikTokenizer p50k_base Test Suite", function() {
     tokenizer_p50k_base = await createByEncoderName("p50k_base", specialTokens);
   });
 
-  test("tokenize source code - p50k_base", (done) => {
-    let source = fs.readFileSync("test/testdata/lib.rs.txt", "utf8");
+  test("tokenize source code - p50k_base", done => {
+    const source = fs.readFileSync("test/testdata/lib.rs.txt", "utf8");
     const filePath = "test/testdata/tokens_p50k_base.json";
 
     fs.readFile(filePath, "utf8", (err, data) => {

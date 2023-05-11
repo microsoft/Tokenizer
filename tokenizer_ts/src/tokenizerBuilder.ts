@@ -3,6 +3,7 @@
 
 import fetch from "node-fetch";
 import * as fs from "fs";
+import * as path from "path";
 import { TikTokenizer } from "./tikTokenizer";
 
 const MODEL_PREFIX_TO_ENCODING: ReadonlyMap<string, string> = new Map([
@@ -85,6 +86,22 @@ function getEncoderFromModelName(modelName: string): string {
     encoder = MODEL_TO_ENCODING.get(modelName)!;
   }
   return encoder;
+}
+
+async function fetchAndSaveFile(
+  mergeableRanksFileUrl: string,
+  filePath: string
+): Promise<void> {
+  const response = await fetch(mergeableRanksFileUrl);
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch file from ${mergeableRanksFileUrl}. Status code: ${response.status}`
+    );
+  }
+
+  const text = await response.text();
+  fs.writeFileSync(filePath, text);
 }
 
 /**
@@ -195,21 +212,17 @@ export async function createByEncoderName(
     specialTokens = new Map([...specialTokens, ...extraSpecialTokens]);
   }
 
-  let fileName = getFilenameFromUrl(mergeableRanksFileUrl);
-  await fetch(mergeableRanksFileUrl)
-    .then(response => {
-      if (response.ok) {
-        return response.text();
-      } else {
-        throw new Error(
-          `Failed to fetch file from ${mergeableRanksFileUrl}. Status code: ${response.status}`
-        );
-      }
-    })
-    .then(text => {
-      fs.writeFileSync(fileName, text);
-    });
+  const fileName = getFilenameFromUrl(mergeableRanksFileUrl);
+  const dirPath = path.resolve(__dirname, "..", "model");
+  // Create the directory if it doesn't exist
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+  }
 
+  await fetchAndSaveFile(
+    mergeableRanksFileUrl,
+    path.resolve(dirPath, fileName)
+  );
   return createTokenizer(fileName, specialTokens, regexPattern);
 }
 

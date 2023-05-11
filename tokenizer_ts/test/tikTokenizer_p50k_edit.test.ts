@@ -20,7 +20,7 @@ suite("TikTokenizer p50k_edit Test Suite", function() {
   });
 
   test("tokenize source code - p50k_edit", done => {
-    let source = fs.readFileSync("test/testdata/lib.rs.txt", "utf8");
+    const source = fs.readFileSync("test/testdata/lib.rs.txt", "utf8");
     const filePath = "test/testdata/tokens_p50k_edit.json";
 
     fs.readFile(filePath, "utf8", (err, data) => {

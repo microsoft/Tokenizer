@@ -20,7 +20,7 @@ suite("TikTokenizer r50k_base Test Suite", function() {
   });
 
   test("tokenize source code - r50k_base", done => {
-    let source = fs.readFileSync("test/testdata/lib.rs.txt", "utf8");
+    const source = fs.readFileSync("test/testdata/lib.rs.txt", "utf8");
     const filePath = "test/testdata/tokens_r50k_base.json";
 
     fs.readFile(filePath, "utf8", (err, data) => {
