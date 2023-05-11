@@ -352,3 +352,4 @@ MigrationBackup/
 # For files in tokenizer_ts
 /tokenizer_ts/dist
 *.tiktoken
+*.tgz
