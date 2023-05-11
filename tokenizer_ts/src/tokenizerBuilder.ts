@@ -144,8 +144,8 @@ export function getSpecialTokensByEncoder(
 export function getSpecialTokensByModel(
   modelName: string
 ): Map<string, number> {
-  let encoderName = getEncoderFromModelName(modelName);
-  let specialTokens: Map<string, number> = getSpecialTokensByEncoder(
+  const encoderName = getEncoderFromModelName(modelName);
+  const specialTokens: Map<string, number> = getSpecialTokensByEncoder(
     encoderName
   );
   return specialTokens;
@@ -172,8 +172,8 @@ export function getRegexByEncoder(encoder: string): string {
  * @returns string regex pattern
  */
 export function getRegexByModel(modelName: string): string {
-  let encoderName = getEncoderFromModelName(modelName);
-  let regexPattern: string = getRegexByEncoder(encoderName);
+  const encoderName = getEncoderFromModelName(modelName);
+  const regexPattern: string = getRegexByEncoder(encoderName);
   return regexPattern;
 }
 

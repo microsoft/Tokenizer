@@ -7,14 +7,9 @@
  * @returns string
  */
 export function uint8ArrayToString(uint8Array: Uint8Array): string {
-  let str = "";
-  for (let i = 0; i < uint8Array.length; i++) {
-    str += uint8Array[i];
-    if (i !== uint8Array.length) {
-      str += "_";
-    }
-  }
-  return str;
+  return Array.from(uint8Array)
+    .map(num => num.toString())
+    .join("_");
 }
 
 /**
