@@ -17,6 +17,7 @@ jobs:
           node-version: 18
           registry-url: 'https://npm.pkg.github.com'
           scope: '@microsoft'
+          always-auth: true
       - run: npm ci
       - run: npm run build
       - run: npm run test
