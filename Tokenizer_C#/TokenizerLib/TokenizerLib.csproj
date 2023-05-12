@@ -62,10 +62,4 @@
 	    <PackagePath>\</PackagePath>
 	  </None>
 	</ItemGroup>
-
-	<ItemGroup>
-	  <None Update="gpt2.tiktoken">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
-	</ItemGroup>
 </Project>

@@ -1,0 +1,20 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "es2020",
+        "lib": [
+            "ES2020",
+            "DOM"
+        ],
+        "sourceMap": true,
+        "rootDir": "src",
+        "strict": true,
+        "noUnusedLocals": true,
+        "outDir": "dist",
+        "declaration": true,
+    },
+    "exclude": [
+        "test",
+        "dist"
+    ]
+}

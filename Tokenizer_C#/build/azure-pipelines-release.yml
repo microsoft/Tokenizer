@@ -4,7 +4,12 @@
 # https://docs.microsoft.com/azure/devops/pipelines/apps/windows/dot-net
 
 trigger:
-- main
+  branches:
+    include:
+    - main
+  paths:
+    include:
+    - Tokenizer_C#
 
 pool:
   name: VSEngSS-MicroBuild2022-1ES
