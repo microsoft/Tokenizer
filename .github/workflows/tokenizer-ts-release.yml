@@ -1,8 +1,6 @@
 name: Publish @microsoft/tiktokenizer to GitHub Packages
 
-on:
-  release:
-    types: [published]
+on: workflow_dispatch
     
 defaults:
   run:
@@ -27,3 +25,7 @@ jobs:
       - run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/upload-artifact@v3
+        with:
+          name: npm-package
+          path: tokenizer_ts/*.tgz
