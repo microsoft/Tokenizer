@@ -15,11 +15,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-      - uses: bikutadesu/create-npmrc@v1.0.0
-        with:
-          org_name: Microsoft
-          auth_token: ${{ secrets.GITHUB_TOKEN }}
-          always_auth: true
+          registry-url: 'https://registry.npmjs.org'
       - run: npm ci
       - run: npm run build
       - run: npm run test
