@@ -34,15 +34,15 @@ Console.WriteLine(decoded);
 
 PerfBenchmark result based on [PerfBenchmark.csproj](Tokenizer_C%23/PerfBenchmark/PerfBenchmark.csproj):
 ``` ini
-BenchmarkDotNet=v0.13.3, OS=Windows 11 (10.0.22621.1413)
+BenchmarkDotNet=v0.13.3, OS=Windows 11 (10.0.22621.1702)
 Intel Core i7-1065G7 CPU 1.30GHz, 1 CPU, 8 logical and 4 physical cores
-.NET SDK=7.0.300-preview.23165.23
-  [Host]     : .NET 6.0.15 (6.0.1523.11507), X64 RyuJIT AVX2
-  DefaultJob : .NET 6.0.15 (6.0.1523.11507), X64 RyuJIT AVX2
-```
+.NET SDK=7.0.300-preview.23179.2
+  [Host]     : .NET 6.0.16 (6.0.1623.17311), X64 RyuJIT AVX2
+  DefaultJob : .NET 6.0.16 (6.0.1623.17311), X64 RyuJIT AVX2
+
 | Method |    Mean |    Error |   StdDev |
 |------- |--------:|---------:|---------:|
-| Encode | 2.376 s | 0.0446 s | 0.0639 s |
+| Encode | 2.414 s | 0.0303 s | 0.0253 s |
 
 # Typescript implementation
 
