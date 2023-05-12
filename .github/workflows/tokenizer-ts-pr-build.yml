@@ -1,4 +1,4 @@
-name: PR build
+name: PR build - tokenizer_ts
 
 on:
   pull_request:
