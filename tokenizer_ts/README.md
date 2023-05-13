@@ -29,8 +29,14 @@ const str = "<|im_start|>Hello World<|im_end|>";
 let tokenizer = null;
 const createTokenizer = async () => {
     tokenizer = await createByModelName("gpt-3.5-turbo", specialTokens);
-    var out = tokenizer.encodeTrimSuffix(str, 3, Array.from(specialTokens.keys()));
-    console.log(out);
+    var out1 = tokenizer.encode(str, Array.from(specialTokens.keys()));
+    console.log(out1);
+    var out2 = tokenizer.encodeTrimSuffix(str, 3, Array.from(specialTokens.keys()));
+    console.log(out2.tokenIds);
+    console.log(out2.text);
+    var out3 = tokenizer.encodeTrimPrefix(str, 3, Array.from(specialTokens.keys()));
+    console.log(out3.tokenIds);
+    console.log(out3.text);
 }
 createTokenizer();
 
