@@ -5,6 +5,13 @@ This is a Typescript implementation of byte pair encoding(BPE) tokenizer for Ope
 
 # How to use
 
+The npm package `@microsoft/tiktokenizer` is published in [GitHub Packages Registry](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry).
+To consume the package, add following to your .npmrc file:
+```
+@microsoft:registry=https://npm.pkg.github.com/
+//npm.pkg.github.com/:_authToken=<your_github_token>
+```
+
 Install the npm package in your project:
 
 ```bash
