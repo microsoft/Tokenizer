@@ -47,42 +47,7 @@ Intel Core i7-1065G7 CPU 1.30GHz, 1 CPU, 8 logical and 4 physical cores
 
 # Typescript implementation
 
-Install the npm package in your project:
-
-```bash
-npm install @microsoft/tiktokenizer
-```
-
-Example Typescript code to use @microsoft/tiktokenizer in your code:
-
-```typescript
-import {
-    createByModelName
-  } from '@microsoft/tiktokenizer';
-
-const IM_START = "<|im_start|>";
-const IM_END = "<|im_end|>";
-const specialTokens: ReadonlyMap<string, number> = new Map([
-  [IM_START, 100264],
-  [IM_END, 100265],
-]);
-
-const str = "<|im_start|>Hello World<|im_end|>";
-let tokenizer = null;
-const createTokenizer = async () => {
-    tokenizer = await createByModelName("gpt-3.5-turbo", specialTokens);
-    var out1 = tokenizer.encode(str, Array.from(specialTokens.keys()));
-    console.log(out1);
-    var out2 = tokenizer.encodeTrimSuffix(str, 3, Array.from(specialTokens.keys()));
-    console.log(out2.tokenIds);
-    console.log(out2.text);
-    var out3 = tokenizer.encodeTrimPrefix(str, 3, Array.from(specialTokens.keys()));
-    console.log(out3.tokenIds);
-    console.log(out3.text);
-}
-createTokenizer();
-
-```
+Please follow [README](tokenizer_ts/README.md).
 
 # Contributing
 
