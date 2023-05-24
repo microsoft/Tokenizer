@@ -7,6 +7,9 @@ pr:
   branches:
     include:
     - main
+  paths:
+    include:
+    - Tokenizer_C#
 
 pool:
   name: VSEngSS-MicroBuild2022-1ES

@@ -8,7 +8,7 @@
 		<Title>Tokenizer</Title>
 		<Description>Tokenizer for OpenAI large language models.</Description>
 		<LangVersion>8.0</LangVersion>
-		<AssemblyVersion>1.3.0</AssemblyVersion>
+		<AssemblyVersion>1.3.1</AssemblyVersion>
 		<FileVersion>$(AssemblyVersion)</FileVersion>
 		<Version>$(AssemblyVersion)</Version>
 		<Authors>Microsoft</Authors>
@@ -60,12 +60,6 @@
 	  <None Include="..\..\README.md">
 	    <Pack>True</Pack>
 	    <PackagePath>\</PackagePath>
-	  </None>
-	</ItemGroup>
-
-	<ItemGroup>
-	  <None Update="gpt2.tiktoken">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
 	</ItemGroup>
 </Project>

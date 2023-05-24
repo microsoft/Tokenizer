@@ -1,0 +1,30 @@
+name: PR build - tokenizer_ts
+
+on:
+  pull_request:
+    branches: [ main ]
+    
+defaults:
+  run:
+    working-directory: tokenizer_ts
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@microsoft'
+          always-auth: true
+      - run: npm ci
+      - run: npm run build
+      - run: npm run test
+      - run: npm pack
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/upload-artifact@v3
+        with:
+          name: npm-package
+          path: tokenizer_ts/*.tgz
