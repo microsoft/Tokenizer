@@ -5,18 +5,18 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.IO;
-
+using System.Threading.Tasks;
 
 namespace TokenizerTest
 {
     [TestClass]
     public class TikTokenizerUnitTest
     {
-        private readonly ITokenizer Tokenizer;
-        private readonly ITokenizer Tokenizer_gpt2;
-        private readonly ITokenizer Tokenizer_p50k_base;
-        private readonly ITokenizer Tokenizer_r50k_base;
-        private readonly ITokenizer Tokenizer_p50k_edit;
+        private ITokenizer Tokenizer;
+        private ITokenizer Tokenizer_gpt2;
+        private ITokenizer Tokenizer_p50k_base;
+        private ITokenizer Tokenizer_r50k_base;
+        private ITokenizer Tokenizer_p50k_edit;
 
         const string IM_START = "<|im_start|>";
         const string IM_END = "<|im_end|>";
@@ -26,13 +26,14 @@ namespace TokenizerTest
                                                     { IM_END, 100265},
                                                 };
 
-        public TikTokenizerUnitTest()
+        [TestInitialize]
+        public async Task TikTokenizerUnitTestInitialize()
         {
-            Tokenizer = TokenizerBuilder.CreateByModelName("gpt-4", SpecialTokens);
-            Tokenizer_gpt2 = TokenizerBuilder.CreateByEncoderName("gpt2");
-            Tokenizer_p50k_base = TokenizerBuilder.CreateByEncoderName("p50k_base");
-            Tokenizer_r50k_base = TokenizerBuilder.CreateByEncoderName("r50k_base");
-            Tokenizer_p50k_edit = TokenizerBuilder.CreateByEncoderName("p50k_edit");
+            Tokenizer = await TokenizerBuilder.CreateByModelNameAsync("gpt-4", SpecialTokens);
+            Tokenizer_gpt2 = await TokenizerBuilder.CreateByEncoderNameAsync("gpt2");
+            Tokenizer_p50k_base = await TokenizerBuilder.CreateByEncoderNameAsync("p50k_base");
+            Tokenizer_r50k_base = await TokenizerBuilder.CreateByEncoderNameAsync("r50k_base");
+            Tokenizer_p50k_edit = await TokenizerBuilder.CreateByEncoderNameAsync("p50k_edit");
         }
 
         [TestMethod]

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Microsoft.DeepDev
 {
@@ -10,11 +11,11 @@ namespace Microsoft.DeepDev
         /// Example usage: Tokenizer.exe "gpt-3.5-turbo" "hello, world"
         /// </summary>
         /// <param name="args">args[0] -- model name, args[1] -- string to be encoded</param>
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             try
             {
-                var tokenizer = TokenizerBuilder.CreateByModelName(args[0]);
+                var tokenizer = await TokenizerBuilder.CreateByModelNameAsync(args[0]);
                 Console.WriteLine($"Tokenizing: [{args[1]}]");
                 var encoded = tokenizer.Encode(args[1], new List<string>());
                 for (var i = 0; i < encoded.Count; i++)
