@@ -7,31 +7,56 @@ To contribute, branch Tokenizer and file a [pull request](https://github.com/mic
 
 ### Building
 
-**C#**
+**C# implementation**
 
-For the C# implementation in Tokenizer_C# folder:
+In Tokenizer_C# folder:
+
 ```bash
 dotnet build Tokenizer.sln
 ```
 
+**Typescript implementation**
+
+In tokenizer_ts folder:
+
+```bash
+npm install
+npm run build
+npm pack
+```
+
 ### Testing
 
-For the C# implementation in Tokenizer_C# folder, run the tests:
+**C# implementation**
+
+In Tokenizer_C# folder, run the tests:
+
 ```bash
 dotnet test
 ```
 
+**Typescript implementation**
+
+In tokenizer_ts folder:
+
+```bash
+npm run test
+```
+
 ## Coding Style
 
-### All Languages
-
-* Line width limit is 150 characters.
-* Conform to indentation conventions and other stylistic aspects of the surrounding code.
- 
 ### C#
 
 Please adhere to Microsoft's [C# Coding Conventions](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/inside-a-program/coding-conventions).
 
+### Typescript
+
+In tokenizer_ts folder using following command for formating and linting:
+
+```bash
+npm run format
+npm run eslint
+```
 
 ## Reporting Issues
 

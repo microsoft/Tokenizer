@@ -165,7 +165,7 @@ namespace Microsoft.DeepDev
                     return await CreateTokenizerAsync(regexPatternStr, mergeableRanksFileUrl, specialTokens);
                 case "gpt2":
                     regexPatternStr = @"'s|'t|'re|'ve|'m|'ll|'d| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+";
-                    mergeableRanksFileUrl = @"gpt2.tiktoken";
+                    mergeableRanksFileUrl = @"https://pythia.blob.core.windows.net/public/encoding/gpt2.tiktoken";
                     specialTokens = new Dictionary<string, int>{
                                             { ENDOFTEXT, 50256 },
                                         };
@@ -183,17 +183,6 @@ namespace Microsoft.DeepDev
 
         }
 
-        private static string AssemblyDirectory
-        {
-            get
-            {
-                string assemblyPath = Assembly.GetExecutingAssembly().Location;
-                UriBuilder uri = new UriBuilder(assemblyPath);
-                string path = Uri.UnescapeDataString(uri.Path);
-                return Path.GetDirectoryName(path);
-            }
-        }
-
         /// <summary>
         /// Create tokenizer based on regex pattern, BPE rank file and special tokens
         /// </summary>
@@ -203,15 +192,7 @@ namespace Microsoft.DeepDev
         /// <returns>The tokenizer</returns>
         private static async Task<ITokenizer> CreateTokenizerAsync(string regexPatternStr, string mergeableRanksFileUrl, Dictionary<string, int> specialTokens)
         {
-            if (mergeableRanksFileUrl.StartsWith("http"))
-            {
-                using (Stream stream = await _httpClient.GetStreamAsync(mergeableRanksFileUrl))
-                {
-                    return CreateTokenizer(stream, specialTokens, regexPatternStr);
-                }
-            }
-            var filePath = Path.Combine(AssemblyDirectory, mergeableRanksFileUrl);
-            using (FileStream stream = new FileStream(filePath, FileMode.Open))
+            using (Stream stream = await _httpClient.GetStreamAsync(mergeableRanksFileUrl))
             {
                 return CreateTokenizer(stream, specialTokens, regexPatternStr);
             }

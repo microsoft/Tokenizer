@@ -11,7 +11,7 @@ using Microsoft.DeepDev.TokenizerLib.Utils;
 namespace Microsoft.DeepDev
 {
     /// <summary>
-    /// This is a C# implementation of OpenAI's tiktoken implementation of
+    /// This is a C# version of OpenAI's tiktoken implementation of
     /// Byte pair encoding(BPE): https://en.wikipedia.org/wiki/Byte_pair_encoding,
     /// the goal is to support context tokenization for OpenAI large language models
     /// in .NET runtime.
@@ -38,7 +38,7 @@ namespace Microsoft.DeepDev
 
         /// <summary>
         /// Take the encoder tokens mapping from OpenAI tiktoken dump to build the encoder
-        /// For gpt-3.5-turbo, you can download the BPE tokens mapping from:
+        /// For gpt-3.5-turbo/gpt4, you can download the BPE tokens mapping from:
         /// https://openaipublic.blob.core.windows.net/encodings/cl100k_base.tiktoken
         /// </summary>
         /// <param name="encoder">Encoder mapping</param>
@@ -86,7 +86,6 @@ namespace Microsoft.DeepDev
 
             SpecialTokensDecoder = specialTokensEncoder.ToDictionary(kvp => kvp.Value, kvp => kvp.Key);
 
-            var sortedTokenBytes = Encoder.Keys.ToList();
         }
 
         /// <summary>

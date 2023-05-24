@@ -11,6 +11,8 @@ namespace Microsoft.DeepDev.TokenizerLib.Utils
         /// </summary>
         public const int DefaultCacheSize = 4096;
 
+        private readonly object _lockObject = new object();
+
         private class CacheItem
         {
             public readonly TKey Key;
@@ -56,17 +58,20 @@ namespace Microsoft.DeepDev.TokenizerLib.Utils
         /// </returns>
         public bool Lookup(TKey key, out TValue value)
         {
-            LinkedListNode<CacheItem> cached;
-            if (_cache.TryGetValue(key, out cached))
+            lock (_lockObject)
             {
-                _lruList.Remove(cached);
-                _lruList.AddFirst(cached);
-                value = cached.Value.Value;
-                return true;
-            }
+                LinkedListNode<CacheItem> cached;
+                if (_cache.TryGetValue(key, out cached))
+                {
+                    _lruList.Remove(cached);
+                    _lruList.AddFirst(cached);
+                    value = cached.Value.Value;
+                    return true;
+                }
 
-            value = default!;
-            return false;
+                value = default!;
+                return false;
+            }
         }
 
         protected virtual void OnEviction(TValue evictedValue) { }
@@ -91,6 +96,14 @@ namespace Microsoft.DeepDev.TokenizerLib.Utils
 
         public bool Replace(TKey key, TValue value, out TValue oldValue)
         {
+            lock (_lockObject)
+            {
+                return ReplaceInternal(key, value, out oldValue);
+            }
+        }
+
+        private bool ReplaceInternal(TKey key, TValue value, out TValue oldValue)
+        {
             if (_cache.TryGetValue(key, out LinkedListNode<CacheItem> cached))
             {
                 oldValue = cached.Value.Value;
@@ -99,7 +112,6 @@ namespace Microsoft.DeepDev.TokenizerLib.Utils
                 _lruList.AddFirst(cached);
                 return true;
             }
-
             EvictIfNeeded();
             var node = new LinkedListNode<CacheItem>(new CacheItem(key, value));
             _cache[key] = node;

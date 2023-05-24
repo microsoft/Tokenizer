@@ -1,0 +1,10 @@
+.vscode
+test
+tsconfig.json
+*.tgz
+/src
+dist/debug.*
+dist/test/*
+debug.ts
+*.tiktoken
+.eslintrc.js
