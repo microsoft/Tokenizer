@@ -2,7 +2,7 @@
   "profiles": {
     "Tokenizer": {
       "commandName": "Project",
-      "commandLineArgs": "gpt-3.5-turbo \"This is a TopGame\""
+      "commandLineArgs": "\"gpt-3.5-turbo\" \"This is a Game\""
     }
   }
 }
