@@ -20,7 +20,7 @@ var specialTokens = new Dictionary<string, int>{
                                             { IM_START, 100264},
                                             { IM_END, 100265},
                                         };
-tokenizer = await TokenizerBuilder.CreateByModelNameAsync("gpt-4", specialTokens);
+var tokenizer = await TokenizerBuilder.CreateByModelNameAsync("gpt-4", specialTokens);
 
 var text = "<|im_start|>Hello World<|im_end|>";
 var encoded = tokenizer.Encode(text, new HashSet<string>(specialTokens.Keys));
