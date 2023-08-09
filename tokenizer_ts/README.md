@@ -18,8 +18,7 @@ Install the npm package in your project:
 npm install @microsoft/tiktokenizer
 ```
 
-Example Typescript code to use @microsoft/tiktokenizer in your code. In production setting, you should pre-download the BPE rank file and call `createTokenizer` API to avoid downloading the BPE rank file on the fly.
-
+Example Typescript code to use @microsoft/tiktokenizer in your code:
 ```typescript
 import {
     createByModelName
@@ -48,6 +47,8 @@ const createTokenizer = async () => {
 createTokenizer();
 
 ```
+In production setting, you should pre-download the BPE rank file and call `createTokenizer` API to avoid downloading the BPE rank file on the fly.
+You can find the model to encoder and encoder to BPE rank file link mapping in: [tokenizerBuilder.ts](https://github.com/microsoft/Tokenizer/blob/44cc0d603b22483abcc71310e25b8b3746f32cd9/tokenizer_ts/src/tokenizerBuilder.ts#L201).
 
 # Contributing
 

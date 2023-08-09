@@ -8,7 +8,7 @@ The TokenizerLib is built in .NET Standard 2.0, which can be consumed in project
 
 You can download and install the nuget package of TokenizerLib [here](https://www.nuget.org/packages/Microsoft.DeepDev.TokenizerLib/).
 
-Example C# code to use TokenizerLib in your code. In production setting, you should pre-download the BPE rank file and call `TokenizerBuilder.CreateTokenizer` API to avoid downloading the BPE rank file on the fly.
+Example C# code to use TokenizerLib in your code:
 ```csharp
 using System.Collections.Generic;
 using Microsoft.DeepDev;
@@ -29,6 +29,8 @@ Console.WriteLine(encoded.Count);
 var decoded = tokenizer.Decode(encoded.ToArray());
 Console.WriteLine(decoded);
 ```
+In production setting, you should pre-download the BPE rank file and call `TokenizerBuilder.CreateTokenizer` API to avoid downloading the BPE rank file on the fly.
+You can find the model to encoder and encoder to BPE rank file link mapping in: [TokenizerBuilder.cs](https://github.com/microsoft/Tokenizer/blob/44cc0d603b22483abcc71310e25b8b3746f32cd9/Tokenizer_C%23/TokenizerLib/TokenizerBuilder.cs#L107).
 
 ## C# performance benchmark
 
