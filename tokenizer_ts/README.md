@@ -48,7 +48,7 @@ createTokenizer();
 
 ```
 In production setting, you should pre-download the BPE rank file and call `createTokenizer` API to avoid downloading the BPE rank file on the fly.
-You can find the model to encoder and encoder to BPE rank file link mapping in: [tokenizerBuilder.ts](https://github.com/microsoft/Tokenizer/blob/44cc0d603b22483abcc71310e25b8b3746f32cd9/tokenizer_ts/src/tokenizerBuilder.ts#L201).
+You can find the model to encoder and encoder to BPE rank file link mapping in: [tokenizerBuilder.ts](https://github.com/microsoft/Tokenizer/blob/main/tokenizer_ts/src/tokenizerBuilder.ts#L15-L55).
 
 # Contributing
 
