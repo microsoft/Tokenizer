@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import fetch from "node-fetch";
 import * as fs from "fs";
 import * as path from "path";
 import { TikTokenizer } from "./tikTokenizer";
