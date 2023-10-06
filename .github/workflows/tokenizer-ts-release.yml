@@ -1,4 +1,4 @@
-name: Publish @microsoft/tiktokenizer to GitHub Packages
+name: Publish @microsoft/tiktokenizer to npmjs
 
 on: workflow_dispatch
     
