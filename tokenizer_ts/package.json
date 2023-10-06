@@ -15,19 +15,21 @@
   "bugs": {
     "url": "https://github.com/Microsoft/Tokenizer/issues"
   },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "main": "dist/index.js",
   "devDependencies": {
     "@types/mocha": "^5.2.7",
-    "@types/node": "^14.14.35",
-    "@types/node-fetch": "^2.5.10",
-    "mocha": "^10.1.0",
-    "ts-node": "^10.9.1",
+    "@types/node": "^18.18.3",
     "@typescript-eslint/eslint-plugin": "^4.14.1",
     "@typescript-eslint/parser": "^4.14.1",
     "eslint": "^7.19.0",
     "eslint-config-prettier": "^7.1.0",
     "eslint-plugin-prettier": "^3.3.1",
-    "prettier": "^1.19.1"
+    "mocha": "^10.1.0",
+    "prettier": "^1.19.1",
+    "ts-node": "^10.9.1"
   },
   "scripts": {
     "test": "mocha -u tdd --require ts-node/register test/**/*.ts",
@@ -36,7 +38,6 @@
     "format": "prettier --write \"./**/*.{ts,tsx}\""
   },
   "dependencies": {
-    "lru-cache": "^9.1.1",
-    "node-fetch": "^2.6.1"
+    "lru-cache": "^9.1.1"
   }
 }
