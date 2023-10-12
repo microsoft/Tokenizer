@@ -213,6 +213,7 @@ export class TikTokenizer {
         const token = this.encoder?.get(uint8ArrayToString(bytes));
         if (token !== undefined) {
           tokenIds.push(token);
+          this.cache.set(match[0], [token]);
         } else {
           const encodedTokens = bytePairEncode(bytes, this.encoder!);
           tokenIds.push(...encodedTokens);
