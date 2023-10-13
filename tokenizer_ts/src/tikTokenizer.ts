@@ -253,6 +253,7 @@ export class TikTokenizer {
         const bytes = this.textEncoder.encode(piece);
         const token = this.encoder!.get(uint8ArrayToString(bytes));
         if (token !== undefined) {
+          this.cache.set(piece, [token]);
           tokenCount++;
           if (tokenCount <= maxTokenCount) {
             encodeLength += piece.length;
@@ -397,6 +398,7 @@ export class TikTokenizer {
             const bytes = new TextEncoder().encode(piece);
             const token = this.encoder!.get(uint8ArrayToString(bytes));
             if (token !== undefined) {
+              this.cache.set(piece, [token]);
               tokenCount++;
               encodeLength += piece.length;
               tokenIds.push(token);
