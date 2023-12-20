@@ -241,11 +241,15 @@ export class TikTokenizer {
       const piece = match[0];
       if (this.cache.has(piece)) {
         let tokens = this.cache.get(piece);
-        tokenCount += tokens!.length;
-        if (tokenCount <= maxTokenCount) {
+        if (tokenCount + tokens!.length <= maxTokenCount) {
+          tokenCount += tokens!.length;
           encodeLength += piece.length;
           tokenIds.push(...tokens!);
         } else {
+          let remainingTokens = maxTokenCount - tokenCount;
+          tokenCount += remainingTokens;
+          encodeLength += piece.length;
+          tokenIds.push(...tokens!.slice(0, remainingTokens));
           break;
         }
       } else {
@@ -254,8 +258,8 @@ export class TikTokenizer {
         const token = this.encoder!.get(uint8ArrayToString(bytes));
         if (token !== undefined) {
           this.cache.set(piece, [token]);
-          tokenCount++;
-          if (tokenCount <= maxTokenCount) {
+          if (tokenCount + 1 <= maxTokenCount) {
+            tokenCount++;
             encodeLength += piece.length;
             tokenIds.push(token);
           } else {
@@ -264,11 +268,15 @@ export class TikTokenizer {
         } else {
           const encodedTokens = bytePairEncode(bytes, this.encoder!);
           this.cache.set(piece, encodedTokens);
-          tokenCount += encodedTokens.length;
-          if (tokenCount <= maxTokenCount) {
+          if (tokenCount + encodedTokens.length <= maxTokenCount) {
+            tokenCount += encodedTokens.length;
             encodeLength += piece.length;
             tokenIds.push(...encodedTokens);
           } else {
+            let remainingTokens = maxTokenCount - tokenCount;
+            tokenCount += remainingTokens;
+            encodeLength += piece.length;
+            tokenIds.push(...encodedTokens.slice(0, remainingTokens));
             break;
           }
         }
@@ -441,6 +449,16 @@ export class TikTokenizer {
         actualPrefixStrLength = value;
         break;
       }
+    }
+
+    // Naive approach if chunks are incorrect
+    if (actualPrefixTokenCount > maxTokenCount) {
+      const encodedTokens = this.encode(text, allowedSpecial);
+      const slicedTokens = encodedTokens.slice(encodedTokens.length - maxTokenCount);
+      return {
+        tokenIds: slicedTokens,
+        text: this.decode(slicedTokens)
+      };
     }
 
     return {
