@@ -91,7 +91,7 @@ suite("TikTokenizer Test Suite", function() {
 
   test("encode trim suffix - 2", () => {
     const str = "<|im_start|>Hello TempWorld<|im_end|>";
-    const encodedStr = "<|im_start|>Hello";
+    const encodedStr = "<|im_start|>Hello TempWorld";
     let encoded = tokenizer.encodeTrimSuffix(
       str,
       5,
@@ -125,8 +125,16 @@ suite("TikTokenizer Test Suite", function() {
       3,
       Array.from(specialTokens.keys())
     );
-    assert.deepStrictEqual(encoded.tokenIds, [100264, 9906]);
+    assert.deepStrictEqual(encoded.tokenIds, [100264, 9906, 20539]);
     assert.deepStrictEqual(encoded.text, encodedStr);
+  });
+
+  test("encode trim suffix - 3", () => {
+    const str = "t".repeat(4000);
+    const encodedStr = tokenizer.encode(str);
+    let encodedTrimSuffix = tokenizer.encodeTrimSuffix(str, 5, []);
+    assert.deepStrictEqual(encodedTrimSuffix.tokenIds.length, 5);
+    assert.deepStrictEqual(encodedTrimSuffix.tokenIds, encodedStr.slice(0, 5));
   });
 
   test("encode trim prefix", () => {
@@ -188,6 +196,7 @@ suite("TikTokenizer Test Suite", function() {
     ]);
     assert.deepStrictEqual(encoded.text, str);
 
+    const testEncode = tokenizer.encode(str, Array.from(specialTokens.keys()));
     encoded = tokenizer.encodeTrimPrefix(
       str,
       3,
@@ -195,6 +204,14 @@ suite("TikTokenizer Test Suite", function() {
     );
     assert.deepStrictEqual(encoded.tokenIds, [4435, 100265]);
     assert.deepStrictEqual(encoded.text, encodedStr);
+  });
+
+  test("encode trim prefix - 3", () => {
+    const str = "t".repeat(4000);
+    const encodedStr = tokenizer.encode(str);
+    let encodedTrimSuffix = tokenizer.encodeTrimPrefix(str, 5, []);
+    assert.deepStrictEqual(encodedTrimSuffix.tokenIds.length, 5);
+    assert.deepStrictEqual(encodedTrimSuffix.tokenIds, encodedStr.slice(encodedStr.length - 5));
   });
 
   test("tokenize source code - gpt-3.5", done => {
