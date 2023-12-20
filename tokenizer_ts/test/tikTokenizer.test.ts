@@ -196,7 +196,6 @@ suite("TikTokenizer Test Suite", function() {
     ]);
     assert.deepStrictEqual(encoded.text, str);
 
-    const testEncode = tokenizer.encode(str, Array.from(specialTokens.keys()));
     encoded = tokenizer.encodeTrimPrefix(
       str,
       3,
