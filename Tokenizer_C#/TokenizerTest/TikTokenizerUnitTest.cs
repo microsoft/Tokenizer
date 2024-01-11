@@ -53,7 +53,7 @@ namespace TokenizerTest
         public void TestEncode1()
         {
             var text = "<|im_start|>Hello World<|im_end|>";
-            var encoded = Tokenizer.Encode(text, new HashSet<string>(SpecialTokens.Keys));
+            var encoded = Tokenizer.Encode(text);
             Assert.AreEqual(4, encoded.Count);
             Assert.AreEqual(100264, encoded[0]);
             Assert.AreEqual(9906, encoded[1]);
@@ -68,6 +68,9 @@ namespace TokenizerTest
         {
             var text = File.ReadAllText("./testData/lib.rs.txt");
             var encoded = Tokenizer.Encode(text, new HashSet<string>(SpecialTokens.Keys));
+            Assert.AreEqual(5584, encoded.Count);
+
+            encoded = Tokenizer.Encode(text, false);
             Assert.AreEqual(5584, encoded.Count);
 
             string json = File.ReadAllText("./testData/tokens.json");
@@ -131,6 +134,14 @@ namespace TokenizerTest
             Assert.AreEqual(4, encoded.TokenIds.Count);
             Assert.AreEqual(text, encoded.Text);
 
+            encoded = Tokenizer.EncodeTrimSuffix(text, 4, false);
+            Assert.AreEqual(4, encoded.TokenIds.Count);
+            Assert.AreEqual("<|im_start", encoded.Text);
+
+            encoded = Tokenizer.EncodeTrimSuffix(text, 4);
+            Assert.AreEqual(4, encoded.TokenIds.Count);
+            Assert.AreEqual(text, encoded.Text);
+
             encoded = Tokenizer.EncodeTrimSuffix(text, new HashSet<string>(SpecialTokens.Keys), 5);
             Assert.AreEqual(4, encoded.TokenIds.Count);
             Assert.AreEqual(text, encoded.Text);
@@ -170,6 +181,14 @@ namespace TokenizerTest
             var text = "<|im_start|>Hello World<|im_end|>";
             var encodedText = "Hello World<|im_end|>";
             var encoded = Tokenizer.EncodeTrimPrefix(text, new HashSet<string>(SpecialTokens.Keys), 4);
+            Assert.AreEqual(4, encoded.TokenIds.Count);
+            Assert.AreEqual(text, encoded.Text);
+
+            encoded = Tokenizer.EncodeTrimPrefix(text, 4, false);
+            Assert.AreEqual(4, encoded.TokenIds.Count);
+            Assert.AreEqual("im_end|>", encoded.Text);
+
+            encoded = Tokenizer.EncodeTrimPrefix(text, 4);
             Assert.AreEqual(4, encoded.TokenIds.Count);
             Assert.AreEqual(text, encoded.Text);
 

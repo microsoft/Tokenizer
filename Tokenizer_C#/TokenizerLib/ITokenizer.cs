@@ -22,6 +22,22 @@ namespace Microsoft.DeepDev
         /// </summary>
         public (List<int> TokenIds, string Text) EncodeTrimPrefix(string text, IReadOnlyCollection<string> allowedSpecial, int maxTokenCount);
 
+        /// <summary>
+        /// Encode a string with or without special tokens set through constructor.
+        /// </summary>
+        public List<int> Encode(string text, bool applySpecialTokens = true);
+
+        /// <summary>
+        /// Encode a piece of text limited by max token count through trimming suffix, with or without special tokens set through constructor.
+        /// </summary>
+        public (List<int> TokenIds, string Text) EncodeTrimSuffix(string text, int maxTokenCount, bool applySpecialTokens = true);
+
+
+        /// <summary>
+        /// Encode a piece of text limited by max token count through trimming prefix, with or without special tokens set through constructor.
+        /// </summary>
+        public (List<int> TokenIds, string Text) EncodeTrimPrefix(string text, int maxTokenCount, bool applySpecialTokens = true);
+
 
         /// <summary>
         /// Decode an array of integer token ids

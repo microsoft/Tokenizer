@@ -21,6 +21,7 @@ namespace Microsoft.DeepDev
     {
 
         private IReadOnlyDictionary<string, int> SpecialTokensEncoder = null!;
+        private IReadOnlyCollection<string> SpecialTokens = null!;
         private Regex Regex = null!;
         private IReadOnlyDictionary<byte[], int> Encoder = null!;
         private IReadOnlyDictionary<int, byte[]> Decoder = null!;
@@ -76,6 +77,7 @@ namespace Microsoft.DeepDev
             Regex = new Regex(pattern, RegexOptions.Compiled);
             SpecialTokensRegex = new Regex(string.Join("|", specialTokensEncoder.Keys.Select(s => Regex.Escape(s))), RegexOptions.Compiled);
             SpecialTokensEncoder = specialTokensEncoder;
+            SpecialTokens = specialTokensEncoder.Keys.ToList();
 
             Decoder = Encoder.ToDictionary(kvp => kvp.Value, kvp => kvp.Key);
 
@@ -136,13 +138,7 @@ namespace Microsoft.DeepDev
             return bpeDict;
         }
 
-        /// <summary>
-        /// Encode a string with a set of allowed special tokens that are not broken apart.
-        /// </summary>
-        /// <param name="text">String to be encoded</param>
-        /// <param name="allowedSpecial">A set of special tokens could appear in the text</param>
-        /// <returns>List of token ids</returns>
-        public List<int> Encode(string text, IReadOnlyCollection<string> allowedSpecial)
+        private List<int> EncodeInternal(string text, IReadOnlyCollection<string> allowedSpecial)
         {
             var tokenIds = new List<int>();
             int start = 0;
@@ -174,6 +170,43 @@ namespace Microsoft.DeepDev
         }
 
         /// <summary>
+        /// Encode a string with a set of allowed special tokens that are not broken apart.
+        /// </summary>
+        /// <param name="text">String to be encoded</param>
+        /// <param name="allowedSpecial">A set of special tokens could appear in the text</param>
+        /// <returns>List of token ids</returns>
+        public List<int> Encode(string text, IReadOnlyCollection<string> allowedSpecial)
+        {
+            if (allowedSpecial is null || allowedSpecial.Count == 0)
+            {
+                return Encode(text, false);
+            }
+            return EncodeInternal(text, allowedSpecial);
+        }
+
+        /// <summary>
+        /// Encode a string with or without special tokens set through constructor.
+        /// </summary>
+        /// <param name="text">String to be encoded</param>
+        /// <param name="applySpecialTokens">Whether to apply special token processing</param>
+        /// <returns></returns>
+        public List<int> Encode(string text, bool applySpecialTokens = true)
+        {
+
+            if (applySpecialTokens && SpecialTokens.Count > 0)
+            {
+                return EncodeInternal(text, SpecialTokens);
+            }
+
+            var tokenIds = new List<int>();
+            int start = 0;
+            Encode(text, tokenIds, start, text.Length);
+
+            return tokenIds;
+
+        }
+
+        /// <summary>
         /// Encode a special token matched through regex.
         /// </summary>
         /// <param name="tokenIds">The list of token ids to add the special token id</param>
@@ -194,7 +227,7 @@ namespace Microsoft.DeepDev
         /// <param name="start">Start search index in the string</param>
         /// <param name="nextSpecial">The regex match of a special token</param>
         /// <param name="end">The index of the special token matched or the end of the text</param>
-        private void FindNextSpecialToken(string text, IReadOnlyCollection<string> allowedSpecial, int start, out Match nextSpecial, out int end)
+        private void FindNextSpecialToken(string text, IReadOnlyCollection<string>? allowedSpecial, int start, out Match nextSpecial, out int end)
         {
             int startFind = start;
             while (true)
@@ -308,14 +341,7 @@ namespace Microsoft.DeepDev
             return (tokenCount, encodeLength);
         }
 
-        /// <summary>
-        /// Encode a piece of text limited by max token count through trimming suffix
-        /// </summary>
-        /// <param name="text">Text to be encoded</param>
-        /// <param name="allowedSpecial">A set of special tokens could appear in the text</param>
-        /// <param name="maxTokenCount">The max token count</param>
-        /// <returns>(List<int> TokenIds, string Text) - Token ids and text after suffix truncation based on max token count</returns>
-        public (List<int> TokenIds, string Text) EncodeTrimSuffix(string text, IReadOnlyCollection<string> allowedSpecial, int maxTokenCount)
+        private (List<int> TokenIds, string Text) EncodeTrimSuffixInternal(string text, IReadOnlyCollection<string> allowedSpecial, int maxTokenCount)
         {
             var tokenIds = new List<int>();
 
@@ -367,21 +393,58 @@ namespace Microsoft.DeepDev
         }
 
         /// <summary>
-        /// Encode a piece of text limited by max token count through trimming prefix
+        /// Encode a piece of text limited by max token count through trimming suffix
         /// </summary>
         /// <param name="text">Text to be encoded</param>
         /// <param name="allowedSpecial">A set of special tokens could appear in the text</param>
         /// <param name="maxTokenCount">The max token count</param>
-        /// <returns>(List<int> TokenIds, string Text) - Token ids and text after prefix truncation based on max token count</returns>
-        public (List<int> TokenIds, string Text) EncodeTrimPrefix(string text, IReadOnlyCollection<string> allowedSpecial, int maxTokenCount)
+        /// <returns>(List<int> TokenIds, string Text) - Token ids and text after suffix truncation based on max token count</returns>
+        public (List<int> TokenIds, string Text) EncodeTrimSuffix(string text, IReadOnlyCollection<string> allowedSpecial, int maxTokenCount)
+        {
+            if (allowedSpecial is null || allowedSpecial.Count == 0)
+            {
+                return EncodeTrimSuffix(text, maxTokenCount, false);
+            }
+
+            return EncodeTrimSuffixInternal(text, allowedSpecial, maxTokenCount);
+
+        }
+
+        /// <summary>
+        /// Encode a piece of text limited by max token count through trimming suffix, with or without special tokens set through constructor.
+        /// </summary>
+        /// <param name="text">String to be encoded</param>
+        /// <param name="maxTokenCount">The max token count</param>
+        /// <param name="applySpecialTokens">Whether to apply special token processing</param>
+        /// <returns></returns>
+        public (List<int> TokenIds, string Text) EncodeTrimSuffix(string text, int maxTokenCount, bool applySpecialTokens = true)
+        {
+            if (applySpecialTokens && SpecialTokens.Count > 0)
+            {
+                return EncodeTrimSuffixInternal(text, SpecialTokens, maxTokenCount);
+            }
+
+            var tokenIds = new List<int>();
+            int start = 0;
+            int tokenCount = 0;
+            var encodeLength = 0;
+            (_, encodeLength) = EncodeTrimSuffix(text, tokenIds, start, text.Length, maxTokenCount, tokenCount, encodeLength);
+            var encodedText = encodeLength == text.Length ? text : text[..encodeLength];
+
+            return (tokenIds, encodedText);
+        }
+
+        private (List<int> TokenIds, string Text) EncodeTrimPrefixInternal(string text, IReadOnlyCollection<string> allowedSpecial, int maxTokenCount)
         {
             var tokenIds = new List<int>();
 
             int start = 0;
             int tokenCount = 0;
             var encodeLength = 0;
-            var tokenCountMap = new SortedDictionary<int, int>();
-            tokenCountMap.Add(tokenCount, encodeLength);
+            var tokenCountMap = new SortedDictionary<int, int>
+            {
+                { tokenCount, encodeLength }
+            };
             while (true)
             {
                 Match nextSpecial;
@@ -390,39 +453,7 @@ namespace Microsoft.DeepDev
 
                 if (end > start)
                 {
-                    foreach (Match match in Regex.Matches(text[start..end]))
-                    {
-                        var piece = match.Value;
-
-                        if (this.Cache.Lookup(match.Value, out int[] tokens))
-                        {
-                            tokenCount += tokens.Length;
-                            encodeLength += piece.Length;
-                            tokenIds.AddRange(tokens);
-                            tokenCountMap[tokenCount] = encodeLength;
-                        }
-                        else
-                        {
-                            var bytes = Encoding.UTF8.GetBytes(piece);
-                            if (Encoder.TryGetValue(bytes, out int token))
-                            {
-                                tokenCount++;
-                                encodeLength += piece.Length;
-                                tokenIds.Add(token);
-                                tokenCountMap[tokenCount] = encodeLength;
-
-                            }
-                            else
-                            {
-                                var encodedTokens = BytePairEncoder.BytePairEncode(bytes, Encoder);
-                                this.Cache.Add(piece, encodedTokens.ToArray());
-                                tokenCount += encodedTokens.Count;
-                                encodeLength += piece.Length;
-                                tokenIds.AddRange(encodedTokens);
-                                tokenCountMap[tokenCount] = encodeLength;
-                            }
-                        }
-                    }
+                    Encode(text, tokenIds, start, ref tokenCount, ref encodeLength, tokenCountMap, end);
                 }
 
                 if (nextSpecial.Success)
@@ -442,6 +473,11 @@ namespace Microsoft.DeepDev
                 }
             }
 
+            return TrimPrefix(text, maxTokenCount, tokenIds, tokenCount, tokenCountMap);
+        }
+
+        private static (List<int> TokenIds, string Text) TrimPrefix(string text, int maxTokenCount, List<int> tokenIds, int tokenCount, SortedDictionary<int, int> tokenCountMap)
+        {
             if (tokenCount <= maxTokenCount)
             {
                 return (tokenIds, text);
@@ -461,6 +497,85 @@ namespace Microsoft.DeepDev
             }
 
             return (tokenIds.Skip(actualPrefixTokenCount).ToList(), text[actualPrefixStrLength..]);
+        }
+
+        private void Encode(string text, List<int> tokenIds, int start, ref int tokenCount, ref int encodeLength, SortedDictionary<int, int> tokenCountMap, int end)
+        {
+            foreach (Match match in Regex.Matches(text[start..end]))
+            {
+                var piece = match.Value;
+
+                if (this.Cache.Lookup(match.Value, out int[] tokens))
+                {
+                    tokenCount += tokens.Length;
+                    encodeLength += piece.Length;
+                    tokenIds.AddRange(tokens);
+                    tokenCountMap[tokenCount] = encodeLength;
+                }
+                else
+                {
+                    var bytes = Encoding.UTF8.GetBytes(piece);
+                    if (Encoder.TryGetValue(bytes, out int token))
+                    {
+                        tokenCount++;
+                        encodeLength += piece.Length;
+                        tokenIds.Add(token);
+                        tokenCountMap[tokenCount] = encodeLength;
+
+                    }
+                    else
+                    {
+                        var encodedTokens = BytePairEncoder.BytePairEncode(bytes, Encoder);
+                        this.Cache.Add(piece, encodedTokens.ToArray());
+                        tokenCount += encodedTokens.Count;
+                        encodeLength += piece.Length;
+                        tokenIds.AddRange(encodedTokens);
+                        tokenCountMap[tokenCount] = encodeLength;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Encode a piece of text limited by max token count through trimming prefix
+        /// </summary>
+        /// <param name="text">Text to be encoded</param>
+        /// <param name="allowedSpecial">A set of special tokens could appear in the text</param>
+        /// <param name="maxTokenCount">The max token count</param>
+        /// <returns>(List<int> TokenIds, string Text) - Token ids and text after prefix truncation based on max token count</returns>
+        public (List<int> TokenIds, string Text) EncodeTrimPrefix(string text, IReadOnlyCollection<string> allowedSpecial, int maxTokenCount)
+        {
+            if (allowedSpecial is null || allowedSpecial.Count == 0)
+            {
+                return EncodeTrimPrefix(text, maxTokenCount, false);
+            }
+            return EncodeTrimPrefixInternal(text, allowedSpecial, maxTokenCount);
+        }
+
+        /// <summary>
+        /// Encode a piece of text limited by max token count through trimming prefix, with or without special tokens set through constructor.
+        /// </summary>
+        /// <param name="text">Text to be encoded</param>
+        /// <param name="maxTokenCount">The max token count</param>
+        /// <param name="applySpecialTokens">Whether to apply special token processing</param>
+        /// <returns></returns>
+        public (List<int> TokenIds, string Text) EncodeTrimPrefix(string text, int maxTokenCount, bool applySpecialTokens = true)
+        {
+            if (applySpecialTokens && SpecialTokens.Count > 0)
+            {
+                return EncodeTrimPrefixInternal(text, SpecialTokens, maxTokenCount);
+            }
+            var tokenIds = new List<int>();
+
+            int start = 0;
+            int tokenCount = 0;
+            var encodeLength = 0;
+            var tokenCountMap = new SortedDictionary<int, int>
+            {
+                { tokenCount, encodeLength }
+            };
+            Encode(text, tokenIds, start, ref tokenCount, ref encodeLength, tokenCountMap, text.Length);
+            return TrimPrefix(text, maxTokenCount, tokenIds, tokenCount, tokenCountMap);
         }
 
         /// <summary>
