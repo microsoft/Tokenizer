@@ -4,6 +4,12 @@ This repo contains C# and Typescript implementation of byte pair encoding(BPE) t
 
 # C# implementation
 
+## Replace with Microsoft.ML.Tokenizers
+
+The C# implementation is being replaced with [Microsoft.ML.Tokenizers](https://www.nuget.org/packages/Microsoft.ML.Tokenizers) from the .NET team.  Users of Microsoft.DeepDev.TokenizerLib should migrate to this new package which will be releaseed stable with .NET 9.0.  Instructions for migration can be found at https://github.com/dotnet/machinelearning/blob/main/docs/code/microsoft-ml-tokenizers-migration-guide.md.
+
+## Microsoft.DeepDev.TokenizerLib
+
 The TokenizerLib is built in .NET Standard 2.0, which can be consumed in projects on any version of .NET later than .NET Core 2.0 or .NET Framework 4.6.1.
 
 You can download and install the nuget package of TokenizerLib [here](https://www.nuget.org/packages/Microsoft.DeepDev.TokenizerLib/).
