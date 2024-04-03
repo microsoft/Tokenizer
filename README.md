@@ -4,8 +4,8 @@ This repo contains C# and Typescript implementation of byte pair encoding(BPE) t
 
 ## C# implementation
 
-> **Important**<br>
-> Users of `Microsoft.DeepDev.TokenizerLib` should migrate to `Microsoft.ML.Tokenizers`. The functionality in `Microsoft.DeepDev.TokenizerLib` has been added to [`Microsoft.ML.Tokenizers`](https://www.nuget.org/packages/Microsoft.ML.Tokenizers). `Microsoft.ML.Tokenizers` is a tokenizer library being developed by the .NET team and going forward, the central place for tokenizer development in .NET. By using `Microsoft.ML.Tokenizers`, you should see improved performance over existing tokenizer library implementations, including `Microsoft.DeepDev.TokenizerLib`. A stable release of `Microsoft.ML.Tokenizers` is expected alongside the .NET 9.0 release (November 2024). Instructions for migration can be found at https://github.com/dotnet/machinelearning/blob/main/docs/code/microsoft-ml-tokenizers-migration-guide.md.
+   > [!IMPORTANT]
+   > Users of `Microsoft.DeepDev.TokenizerLib` should migrate to `Microsoft.ML.Tokenizers`. The functionality in `Microsoft.DeepDev.TokenizerLib` has been added to [`Microsoft.ML.Tokenizers`](https://www.nuget.org/packages/Microsoft.ML.Tokenizers). `Microsoft.ML.Tokenizers` is a tokenizer library being developed by the .NET team and going forward, the central place for tokenizer development in .NET. By using `Microsoft.ML.Tokenizers`, you should see improved performance over existing tokenizer library implementations, including `Microsoft.DeepDev.TokenizerLib`. A stable release of `Microsoft.ML.Tokenizers` is expected alongside the .NET 9.0 release (November 2024). Instructions for migration can be found at https://github.com/dotnet/machinelearning/blob/main/docs/code/microsoft-ml-tokenizers-migration-guide.md.
 
 ## Typescript implementation
 
