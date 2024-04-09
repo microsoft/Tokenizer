@@ -7,9 +7,7 @@
  * @returns string
  */
 export function uint8ArrayToString(uint8Array: Uint8Array): string {
-  return Array.from(uint8Array)
-    .map(num => num.toString())
-    .join("_");
+  return uint8Array.toString();
 }
 
 /**
