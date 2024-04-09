@@ -1,15 +1,66 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-/**
- * Convert a Uint8Array to a string
- * @param uint8Array
- * @returns string
- */
-export function uint8ArrayToString(uint8Array: Uint8Array): string {
-  return Array.from(uint8Array)
-    .map(num => num.toString())
-    .join("_");
+const enum Constant {
+  // we have 48 bits per level, we can safely bitwise encode 32 bits at a time,
+  // so this works in two passes
+  BytesPerLevel = 6,
+}
+
+const binaryMapKey = (k: Uint8Array): number => {
+  const lower = k[0] | (k[1] << 8) | (k[2] << 16);
+  const upper = 0xFFFFFF * (k[3] | (k[4] << 8) | (k[5] << 16));
+  return lower + upper;
+};
+
+export class BinaryMap<V> {
+  private readonly map: Map<number, BinaryMap<V> | V> = new Map();
+  private thisValue?: V;
+
+  public get(key: Uint8Array): V | undefined {
+    const value = this.map.get(binaryMapKey(key));
+    const isFinal = key.length < Constant.BytesPerLevel;
+
+    if (isFinal) {
+      return value instanceof BinaryMap ? value.thisValue : value;
+    } else if (value instanceof BinaryMap) {
+      return value.get(key.subarray(Constant.BytesPerLevel));
+    } else {
+      return undefined;
+    }
+  }
+
+  public set(key: Uint8Array, value: V): void {
+    const k = binaryMapKey(key);
+    const existing = this.map.get(k);
+    const isFinal = key.length < Constant.BytesPerLevel;
+
+    if (existing === undefined) {
+      if (isFinal) {
+        this.map.set(k, value);
+      } else {
+        const newMap = new BinaryMap<V>();
+        newMap.set(key.subarray(Constant.BytesPerLevel), value);
+        this.map.set(k, newMap);
+      }
+    } else if (isFinal) {
+      if (existing instanceof BinaryMap) {
+        existing.thisValue = value;
+      } else {
+        this.map.set(k, value);
+      }
+    } else {
+      if (existing instanceof BinaryMap) {
+        existing.set(key.subarray(Constant.BytesPerLevel), value);
+      } else {
+        const newMap = new BinaryMap<V>();
+        newMap.set(key.subarray(Constant.BytesPerLevel), value);
+        newMap.thisValue = existing;
+        this.map.set(k, newMap);
+      }
+
+    }
+  }
 }
 
 /**
@@ -20,10 +71,10 @@ export function uint8ArrayToString(uint8Array: Uint8Array): string {
  */
 export function bytePairEncode(
   mergingBytes: Uint8Array,
-  ranks: ReadonlyMap<string, number>
+  ranks: BinaryMap<number>
 ): number[] {
   if (mergingBytes.length === 1) {
-    return [ranks.get(mergingBytes[0].toString())!];
+    return [ranks.get(mergingBytes)!];
   }
 
   const byteIndicesAndRanks: [number, number][] = [];
@@ -37,7 +88,7 @@ export function bytePairEncode(
         byteIndicesAndRanks[startIndex][0],
         byteIndicesAndRanks[startIndex + skip + 2][0]
       );
-      const rank = ranks.get(uint8ArrayToString(slice));
+      const rank = ranks.get(slice);
       if (rank !== undefined) {
         return rank;
       }
@@ -75,12 +126,12 @@ export function bytePairEncode(
   for (let i = 0; i < byteIndicesAndRanks.length - 1; i++) {
     outList.push(
       ranks.get(
-        uint8ArrayToString(
+
           mergingBytes.slice(
             byteIndicesAndRanks[i][0],
             byteIndicesAndRanks[i + 1][0]
           )
-        )
+
       )!
     );
   }
