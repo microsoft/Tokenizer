@@ -100,9 +100,8 @@ export class TikTokenizer {
     }
     this.regex = new RegExp(regexPattern, "gu");
     this.specialTokensRegex = new RegExp(
-      Array.from(specialTokensEncoder.keys())
-        .map(s => escapeRegExp(s))
-        .join("|")
+      Array.from(specialTokensEncoder.keys(), s => escapeRegExp(s))
+        .join("|"),
     );
     this.specialTokensEncoder = specialTokensEncoder;
 
@@ -200,8 +199,9 @@ export class TikTokenizer {
     const substring = text.substring(start, end);
     this.regex!.lastIndex = 0;
     while ((match = this.regex!.exec(substring))) {
-      if (this.cache.has(match[0])) {
-        tokenIds.push(...this.cache.get(match[0])!);
+      const cached = this.cache.get(match[0]);
+      if (cached) {
+        tokenIds.push(...cached);
       } else {
         // cache miss
         const bytes = this.textEncoder.encode(match[0]);
@@ -232,17 +232,17 @@ export class TikTokenizer {
     this.regex!.lastIndex = 0;
     while ((match = this.regex!.exec(substring))) {
       const piece = match[0];
-      if (this.cache.has(piece)) {
-        let tokens = this.cache.get(piece);
-        if (tokenCount + tokens!.length <= maxTokenCount) {
-          tokenCount += tokens!.length;
+      const cached = this.cache.get(piece);
+      if (cached) {
+        if (tokenCount + cached.length <= maxTokenCount) {
+          tokenCount += cached.length;
           encodeLength += piece.length;
-          tokenIds.push(...tokens!);
+          tokenIds.push(...cached);
         } else {
           let remainingTokens = maxTokenCount - tokenCount;
           tokenCount += remainingTokens;
           encodeLength += piece.length;
-          tokenIds.push(...tokens!.slice(0, remainingTokens));
+          tokenIds.push(...cached.slice(0, remainingTokens));
           break;
         }
       } else {
@@ -387,14 +387,14 @@ export class TikTokenizer {
         while ((match = this.regex!.exec(substring))) {
           const piece = match[0];
 
-          if (this.cache.has(piece)) {
-            let tokens = this.cache.get(piece);
-            tokenCount += tokens!.length;
+          const cached = this.cache.get(piece);
+          if (cached) {
+            tokenCount += cached.length;
             encodeLength += piece.length;
-            tokenIds.push(...tokens!);
+            tokenIds.push(...cached);
             tokenCountMap.set(tokenCount, encodeLength);
           } else {
-            const bytes = new TextEncoder().encode(piece);
+            const bytes = this.textEncoder.encode(piece);
             const token = this.encoder!.get(uint8ArrayToString(bytes));
             if (token !== undefined) {
               this.cache.set(piece, [token]);
