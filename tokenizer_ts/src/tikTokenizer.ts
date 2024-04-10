@@ -196,17 +196,13 @@ export class TikTokenizer {
     start: number,
     end: number
   ): void {
-    let match: RegExpMatchArray | null | undefined;
-    const matches = Array.from(
-      text.substring(start, end).matchAll(this.regex!)
-    );
-    for (var i = 0; i < matches.length; i++) {
-      match = matches[i];
-      if (match === undefined) {
-        break;
-      }
-      if (this.cache.has(match[0])) {
-        tokenIds.push(...this.cache.get(match[0])!);
+    let match: RegExpExecArray | null;
+    const substring = text.substring(start, end);
+    this.regex!.lastIndex = 0;
+    while ((match = this.regex!.exec(substring))) {
+      const cached = this.cache.get(match[0]);
+      if (cached) {
+        tokenIds.push(...cached);
       } else {
         // cache miss
         const bytes = this.textEncoder.encode(match[0]);
@@ -232,12 +228,10 @@ export class TikTokenizer {
     tokenCount: number,
     encodeLength: number
   ): { tokenCount: number; encodeLength: number } {
-    let match: RegExpMatchArray | null | undefined;
-    const matches = Array.from(
-      text.substring(start, end).matchAll(this.regex!)
-    );
-    for (var i = 0; i < matches.length; i++) {
-      match = matches[i];
+    let match: RegExpExecArray | null;
+    const substring = text.substring(start, end);
+    this.regex!.lastIndex = 0;
+    while ((match = this.regex!.exec(substring))) {
       const piece = match[0];
       if (this.cache.has(piece)) {
         let tokens = this.cache.get(piece);
@@ -388,12 +382,10 @@ export class TikTokenizer {
       );
 
       if (end > start) {
-        let match: RegExpMatchArray | null | undefined;
-        const matches = Array.from(
-          text.substring(start, end).matchAll(this.regex!)
-        );
-        for (var i = 0; i < matches.length; i++) {
-          match = matches[i];
+        let match: RegExpExecArray | null;
+        const substring = text.substring(start, end);
+        this.regex!.lastIndex = 0;
+        while ((match = this.regex!.exec(substring))) {
           const piece = match[0];
 
           if (this.cache.has(piece)) {
