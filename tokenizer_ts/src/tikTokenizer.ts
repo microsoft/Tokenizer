@@ -200,8 +200,9 @@ export class TikTokenizer {
     const substring = text.substring(start, end);
     this.regex!.lastIndex = 0;
     while ((match = this.regex!.exec(substring))) {
-      if (this.cache.has(match[0])) {
-        tokenIds.push(...this.cache.get(match[0])!);
+      const cached = this.cache.get(match[0]);
+      if (cached) {
+        tokenIds.push(...cached);
       } else {
         // cache miss
         const bytes = this.textEncoder.encode(match[0]);

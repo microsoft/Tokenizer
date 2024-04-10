@@ -63,6 +63,8 @@ export class BinaryMap<V> {
   }
 }
 
+const maxRank = 0x7FFFFFFF; // max int32, try and keep things in integer space
+
 /**
  * This function implements the byte pair encoding algorithm.
  * @param mergingBytes: bytes to be merged
@@ -77,14 +79,25 @@ export function bytePairEncode(
     return [ranks.get(mergingBytes)!];
   }
 
+  let minRank = maxRank;
+  let minIndex = -1;
+
   const byteIndicesAndRanks: [number, number][] = [];
-  for (let i = 0; i < mergingBytes.length + 1; i++) {
-    byteIndicesAndRanks.push([i, Number.MAX_SAFE_INTEGER]);
+  for (let i = 0; i < mergingBytes.length - 1; i++) {
+    const rank = ranks.get(mergingBytes.subarray(i, i + 2)) ?? maxRank;
+    if (rank < minRank) {
+      minRank = rank;
+      minIndex = i;
+    }
+
+    byteIndicesAndRanks.push([i, rank]);
   }
+  byteIndicesAndRanks.push([mergingBytes.length - 1, maxRank]);
+  byteIndicesAndRanks.push([mergingBytes.length, maxRank]);
 
   function getRank(startIndex: number, skip = 0): number {
     if (startIndex + skip + 2 < byteIndicesAndRanks.length) {
-      const slice = mergingBytes.slice(
+      const slice = mergingBytes.subarray(
         byteIndicesAndRanks[startIndex][0],
         byteIndicesAndRanks[startIndex + skip + 2][0]
       );
@@ -93,32 +106,24 @@ export function bytePairEncode(
         return rank;
       }
     }
-    return Number.MAX_SAFE_INTEGER;
+    return maxRank;
   }
 
-  for (let i = 0; i < byteIndicesAndRanks.length - 2; i++) {
-    const rank = getRank(i);
-    if (rank !== Number.MAX_SAFE_INTEGER) {
-      byteIndicesAndRanks[i][1] = rank;
+  while (minRank !== maxRank) {
+    byteIndicesAndRanks[minIndex][1] = getRank(minIndex, 1);
+    if (minIndex > 0) {
+      byteIndicesAndRanks[minIndex - 1][1] = getRank(minIndex - 1, 1);
     }
-  }
+    byteIndicesAndRanks.splice(minIndex + 1, 1);
 
-  while (byteIndicesAndRanks.length > 1) {
-    let minRank: [number, number] = [0, Number.MAX_SAFE_INTEGER];
+
+    minIndex = -1;
+    minRank = maxRank;
     for (let i = 0; i < byteIndicesAndRanks.length - 1; i++) {
-      if (byteIndicesAndRanks[i][1] < minRank[1]) {
-        minRank = [i, byteIndicesAndRanks[i][1]];
+      if (byteIndicesAndRanks[i][1] < minRank) {
+        minRank = byteIndicesAndRanks[i][1];
+        minIndex = i;
       }
-    }
-    if (minRank[1] !== Number.MAX_SAFE_INTEGER) {
-      const j = minRank[0];
-      byteIndicesAndRanks[j][1] = getRank(j, 1);
-      if (j > 0) {
-        byteIndicesAndRanks[j - 1][1] = getRank(j - 1, 1);
-      }
-      byteIndicesAndRanks.splice(j + 1, 1);
-    } else {
-      break;
     }
   }
 
@@ -126,12 +131,10 @@ export function bytePairEncode(
   for (let i = 0; i < byteIndicesAndRanks.length - 1; i++) {
     outList.push(
       ranks.get(
-
-          mergingBytes.slice(
-            byteIndicesAndRanks[i][0],
-            byteIndicesAndRanks[i + 1][0]
-          )
-
+        mergingBytes.subarray(
+          byteIndicesAndRanks[i][0],
+          byteIndicesAndRanks[i + 1][0]
+        )
       )!
     );
   }
