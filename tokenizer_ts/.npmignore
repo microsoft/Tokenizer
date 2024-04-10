@@ -6,5 +6,6 @@ tsconfig.json
 dist/debug.*
 dist/test/*
 debug.ts
+*.map
 *.tiktoken
 .eslintrc.js
