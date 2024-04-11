@@ -7,31 +7,43 @@ const enum Constant {
   BytesPerLevel = 6,
 }
 
-const binaryMapKey = (k: Uint8Array): number => {
-  const lower = k[0] | (k[1] << 8) | (k[2] << 16);
-  const upper = 0xFFFFFF * (k[3] | (k[4] << 8) | (k[5] << 16));
-  return lower + upper;
+const binaryMapKey = (k: Uint8Array, start: number, end: number): number => {
+  const length = end-start;
+  
+  // 'lower' and 'upper' are both 24-bit integers, like
+  //    0xFF FF FF
+  //      ^3 ^2 ^1
+  // If we say have a length of 2, we should disregard the last "3" byte, so we
+  // create a mask like
+  //    0x00 FF FF  (started at 0xFF FF FF and shifted over by 8 bits)
+  //      ^3 ^2 ^1
+  // so that we discard the data outside our range
+  const lowerMask = 0xFFFFFF >>> Math.max(0, (3 - length) * 8);
+  const lower = (k[start + 0] | (k[start + 1] << 8) | (k[start + 2] << 16)) & lowerMask;
+  const upperMask = 0xFFFFFF >>> Math.max(0, (6 - length) * 8);
+  const upper = (k[start + 3] | (k[start + 4] << 8) | (k[start + 5] << 16)) & upperMask;
+  return lower + (0xFFFFFF * upper);
 };
 
 export class BinaryMap<V> {
   private readonly map: Map<number, BinaryMap<V> | V> = new Map();
   private thisValue?: V;
 
-  public get(key: Uint8Array): V | undefined {
-    const value = this.map.get(binaryMapKey(key));
-    const isFinal = key.length < Constant.BytesPerLevel;
+  public get(key: Uint8Array, start: number = 0, end: number = key.length): V | undefined {
+    const value = this.map.get(binaryMapKey(key,start, end));
+    const isFinal = end < Constant.BytesPerLevel+start;
 
     if (isFinal) {
       return value instanceof BinaryMap ? value.thisValue : value;
     } else if (value instanceof BinaryMap) {
-      return value.get(key.subarray(Constant.BytesPerLevel));
+      return value.get(key, Constant.BytesPerLevel+start, end);
     } else {
       return undefined;
     }
   }
 
   public set(key: Uint8Array, value: V): void {
-    const k = binaryMapKey(key);
+    const k = binaryMapKey(key, 0, key.length);
     const existing = this.map.get(k);
     const isFinal = key.length < Constant.BytesPerLevel;
 
@@ -84,7 +96,7 @@ export function bytePairEncode(
 
   const byteIndicesAndRanks: [number, number][] = [];
   for (let i = 0; i < mergingBytes.length - 1; i++) {
-    const rank = ranks.get(mergingBytes.subarray(i, i + 2)) ?? maxRank;
+    const rank = ranks.get(mergingBytes,i, i + 2) ?? maxRank;
     if (rank < minRank) {
       minRank = rank;
       minIndex = i;
@@ -97,11 +109,11 @@ export function bytePairEncode(
 
   function getRank(startIndex: number, skip = 0): number {
     if (startIndex + skip + 2 < byteIndicesAndRanks.length) {
-      const slice = mergingBytes.subarray(
+      const rank = ranks.get(
+        mergingBytes,
         byteIndicesAndRanks[startIndex][0],
         byteIndicesAndRanks[startIndex + skip + 2][0]
       );
-      const rank = ranks.get(slice);
       if (rank !== undefined) {
         return rank;
       }
@@ -131,10 +143,9 @@ export function bytePairEncode(
   for (let i = 0; i < byteIndicesAndRanks.length - 1; i++) {
     outList.push(
       ranks.get(
-        mergingBytes.subarray(
-          byteIndicesAndRanks[i][0],
-          byteIndicesAndRanks[i + 1][0]
-        )
+        mergingBytes,
+        byteIndicesAndRanks[i][0],
+        byteIndicesAndRanks[i + 1][0]
       )!
     );
   }
