@@ -8,8 +8,8 @@ const enum Constant {
 }
 
 const binaryMapKey = (k: Uint8Array, start: number, end: number): number => {
-  const length = end-start;
-  
+  const length = end - start;
+
   // 'lower' and 'upper' are both 24-bit integers, like
   //    0xFF FF FF
   //      ^3 ^2 ^1
@@ -30,13 +30,13 @@ export class BinaryMap<V> {
   private thisValue?: V;
 
   public get(key: Uint8Array, start: number = 0, end: number = key.length): V | undefined {
-    const value = this.map.get(binaryMapKey(key,start, end));
-    const isFinal = end < Constant.BytesPerLevel+start;
+    const value = this.map.get(binaryMapKey(key, start, end));
+    const isFinal = end < Constant.BytesPerLevel + start;
 
     if (isFinal) {
       return value instanceof BinaryMap ? value.thisValue : value;
     } else if (value instanceof BinaryMap) {
-      return value.get(key, Constant.BytesPerLevel+start, end);
+      return value.get(key, Constant.BytesPerLevel + start, end);
     } else {
       return undefined;
     }
@@ -96,7 +96,7 @@ export function bytePairEncode(
 
   const byteIndicesAndRanks: [number, number][] = [];
   for (let i = 0; i < mergingBytes.length - 1; i++) {
-    const rank = ranks.get(mergingBytes,i, i + 2) ?? maxRank;
+    const rank = ranks.get(mergingBytes, i, i + 2) ?? maxRank;
     if (rank < minRank) {
       minRank = rank;
       minIndex = i;
