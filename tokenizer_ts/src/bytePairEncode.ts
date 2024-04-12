@@ -20,12 +20,8 @@ const binaryMapKey = (k: Uint8Array, start: number, end: number): number => {
   // so that we discard the data outside our range
   const lowerMask = 0xFFFFFF >>> Math.max(0, (3 - length) * 8);
   const lower = (k[start + 0] | (k[start + 1] << 8) | (k[start + 2] << 16)) & lowerMask;
-  
-  if (length <= 3) {
-    return lower;
-  }
 
-  const upperMask = 0xFFFFFF >>> Math.max(0, (6 - length) * 8);
+  const upperMask = 0xFFFFFF >>> Math.min(31, Math.max(0, (6 - length) * 8));
   const upper = (k[start + 3] | (k[start + 4] << 8) | (k[start + 5] << 16)) & upperMask;
   return lower + (0xFFFFFF * upper);
 };
