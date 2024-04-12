@@ -8,3 +8,5 @@ dist/test/*
 debug.ts
 *.tiktoken
 .eslintrc.js
+/perf/*
+*.map
