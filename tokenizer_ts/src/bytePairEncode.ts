@@ -7,7 +7,8 @@ const enum Constant {
   BytesPerLevel = 6,
 }
 
-const binaryMapKey = (k: Uint8Array, start: number, end: number): number => {
+// exported for testing
+export const binaryMapKey = (k: Uint8Array, start: number, end: number): number => {
   const length = end - start;
 
   // 'lower' and 'upper' are both 24-bit integers, like
@@ -23,7 +24,7 @@ const binaryMapKey = (k: Uint8Array, start: number, end: number): number => {
 
   const upperMask = 0xFFFFFF >>> Math.min(31, Math.max(0, (6 - length) * 8));
   const upper = (k[start + 3] | (k[start + 4] << 8) | (k[start + 5] << 16)) & upperMask;
-  return lower + (0xFFFFFF * upper);
+  return lower + (0x1000000 * upper);
 };
 
 export class BinaryMap<V> {
