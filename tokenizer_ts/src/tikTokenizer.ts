@@ -202,17 +202,21 @@ export class TikTokenizer {
     while ((match = this.regex!.exec(substring))) {
       const cached = this.cache.get(match[0]);
       if (cached) {
-        tokenIds.push(...cached);
+        for (const b of cached) {
+          tokenIds.push(b);
+        }
       } else {
         // cache miss
         const bytes = this.textEncoder.encode(match[0]);
-        const token = this.encoder?.get(bytes, 0, this.textEncoder.length);
+        const token = this.encoder!.get(bytes, 0, this.textEncoder.length);
         if (token !== undefined) {
           tokenIds.push(token);
           this.cache.set(match[0], [token]);
         } else {
           const encodedTokens = bytePairEncode(bytes, this.encoder!, this.textEncoder.length);
-          tokenIds.push(...encodedTokens);
+          for (const b of encodedTokens) {
+            tokenIds.push(b);
+          }
           this.cache.set(match[0], encodedTokens);
         }
       }
@@ -265,12 +269,16 @@ export class TikTokenizer {
           if (tokenCount + encodedTokens.length <= maxTokenCount) {
             tokenCount += encodedTokens.length;
             encodeLength += piece.length;
-            tokenIds.push(...encodedTokens);
+            for (const b of encodedTokens) {
+              tokenIds.push(b);
+            }
           } else {
             let remainingTokens = maxTokenCount - tokenCount;
             tokenCount += remainingTokens;
             encodeLength += piece.length;
-            tokenIds.push(...encodedTokens.slice(0, remainingTokens));
+            for (let i = 0; i < remainingTokens; i++) {
+              tokenIds.push(encodedTokens[i]);
+            }
             break;
           }
         }
@@ -407,7 +415,9 @@ export class TikTokenizer {
               this.cache.set(piece, encodedTokens);
               tokenCount += encodedTokens.length;
               encodeLength += piece.length;
-              tokenIds.push(...encodedTokens);
+              for (const b of encodedTokens) {
+                tokenIds.push(b);
+              }
               tokenCountMap.set(tokenCount, encodeLength);
             }
           }
