@@ -2,10 +2,10 @@
 // Licensed under the MIT License.
 
 import * as fs from "fs";
-import { LRUCache } from "lru-cache";
 import { TextDecoder } from "util";
 import { BinaryMap, bytePairEncode } from "./bytePairEncode";
 import { makeTextEncoder } from './textEncoder';
+import { ILRUCache, LRUCache } from './lru';
 
 /**
  * Load BPE ranks from a file
@@ -67,7 +67,7 @@ export class TikTokenizer {
   private specialTokensDecoder?: Map<number, string>;
   private textEncoder = makeTextEncoder();
   private textDecoder = new TextDecoder("utf-8");
-  public readonly cache: LRUCache<string, number[]>;
+  public readonly cache: ILRUCache;
 
   /**
    * Take the encoder tokens mapping from OpenAI tiktoken dump to build the encoder
@@ -84,8 +84,7 @@ export class TikTokenizer {
     regexPattern: string,
     cacheSize: number = 8192
   ) {
-    const options = { max: cacheSize };
-    this.cache = new LRUCache(options);
+    this.cache = new LRUCache(cacheSize);
     const bpeDict = loadTikTokenBpe(tikTokenBpeFile);
     this.init(bpeDict, specialTokensEncoder, regexPattern);
   }
@@ -234,17 +233,17 @@ export class TikTokenizer {
     this.regex!.lastIndex = 0;
     while ((match = this.regex!.exec(substring))) {
       const piece = match[0];
-      if (this.cache.has(piece)) {
-        let tokens = this.cache.get(piece);
-        if (tokenCount + tokens!.length <= maxTokenCount) {
-          tokenCount += tokens!.length;
+      const cachedTokens = this.cache.get(piece);
+      if (cachedTokens) {
+        if (tokenCount + cachedTokens.length <= maxTokenCount) {
+          tokenCount += cachedTokens.length;
           encodeLength += piece.length;
-          tokenIds.push(...tokens!);
+          tokenIds.push(...cachedTokens);
         } else {
           let remainingTokens = maxTokenCount - tokenCount;
           tokenCount += remainingTokens;
           encodeLength += piece.length;
-          tokenIds.push(...tokens!.slice(0, remainingTokens));
+          tokenIds.push(...cachedTokens.slice(0, remainingTokens));
           break;
         }
       } else {
@@ -388,12 +387,11 @@ export class TikTokenizer {
         this.regex!.lastIndex = 0;
         while ((match = this.regex!.exec(substring))) {
           const piece = match[0];
-
-          if (this.cache.has(piece)) {
-            let tokens = this.cache.get(piece);
-            tokenCount += tokens!.length;
+          const cachedTokens = this.cache.get(piece);
+          if (cachedTokens) {
+            tokenCount += cachedTokens.length;
             encodeLength += piece.length;
-            tokenIds.push(...tokens!);
+            tokenIds.push(...cachedTokens);
             tokenCountMap.set(tokenCount, encodeLength);
           } else {
             const bytes = this.textEncoder.encode(piece);
