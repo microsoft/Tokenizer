@@ -31,51 +31,34 @@ export const binaryMapKey = (k: Uint8Array, start: number, end: number): number 
 };
 
 export class BinaryMap<V> {
-  private readonly map: Map<number, BinaryMap<V> | V> = new Map();
-  private thisValue?: V;
+  private readonly nested: Map<number, BinaryMap<V>> = new Map();
+  private readonly final: Map<number, V> = new Map();
 
   public get(key: Uint8Array, start: number = 0, end: number = key.length): V | undefined {
-    const value = this.map.get(binaryMapKey(key, start, end));
     const isFinal = end < Constant.BytesPerLevel + start;
-
+    const mapKey = binaryMapKey(key, start, end);
     if (isFinal) {
-      return value instanceof BinaryMap ? value.thisValue : value;
-    } else if (value instanceof BinaryMap) {
-      return value.get(key, Constant.BytesPerLevel + start, end);
-    } else {
-      return undefined;
+      return this.final.get(mapKey);
     }
+
+    return this.nested.get(mapKey)?.get(key, Constant.BytesPerLevel + start, end);
   }
 
   public set(key: Uint8Array, value: V): void {
     const k = binaryMapKey(key, 0, key.length);
-    const existing = this.map.get(k);
     const isFinal = key.length < Constant.BytesPerLevel;
+    if (isFinal) {
+      this.final.set(k, value);
+      return;
+    }
 
-    if (existing === undefined) {
-      if (isFinal) {
-        this.map.set(k, value);
-      } else {
-        const newMap = new BinaryMap<V>();
-        newMap.set(key.subarray(Constant.BytesPerLevel), value);
-        this.map.set(k, newMap);
-      }
-    } else if (isFinal) {
-      if (existing instanceof BinaryMap) {
-        existing.thisValue = value;
-      } else {
-        this.map.set(k, value);
-      }
+    const existing = this.nested.get(k);
+    if (existing instanceof BinaryMap) {
+      existing.set(key.subarray(Constant.BytesPerLevel), value);
     } else {
-      if (existing instanceof BinaryMap) {
-        existing.set(key.subarray(Constant.BytesPerLevel), value);
-      } else {
-        const newMap = new BinaryMap<V>();
-        newMap.set(key.subarray(Constant.BytesPerLevel), value);
-        newMap.thisValue = existing;
-        this.map.set(k, newMap);
-      }
-
+      const newMap = new BinaryMap<V>();
+      newMap.set(key.subarray(Constant.BytesPerLevel), value);
+      this.nested.set(k, newMap);
     }
   }
 }
