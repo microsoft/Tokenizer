@@ -9,3 +9,5 @@ debug.ts
 *.map
 *.tiktoken
 .eslintrc.js
+/perf/*
+*.map

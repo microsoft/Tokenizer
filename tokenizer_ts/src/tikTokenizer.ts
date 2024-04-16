@@ -3,8 +3,9 @@
 
 import * as fs from "fs";
 import { LRUCache } from "lru-cache";
-import { TextDecoder, TextEncoder } from "util";
-import { bytePairEncode, uint8ArrayToString } from "./bytePairEncode";
+import { TextDecoder } from "util";
+import { BinaryMap, bytePairEncode } from "./bytePairEncode";
+import { makeTextEncoder } from './textEncoder';
 
 /**
  * Load BPE ranks from a file
@@ -59,12 +60,12 @@ function escapeRegExp(regex: string) {
  */
 export class TikTokenizer {
   private regex?: RegExp;
-  private encoder?: Map<string, number>;
+  private encoder?: BinaryMap<number>;
   private decoder?: Map<number, Uint8Array>;
   private specialTokensRegex?: RegExp;
   private specialTokensEncoder?: ReadonlyMap<string, number>;
   private specialTokensDecoder?: Map<number, string>;
-  private textEncoder = new TextEncoder();
+  private textEncoder = makeTextEncoder();
   private textDecoder = new TextDecoder("utf-8");
   public readonly cache: LRUCache<string, number[]>;
 
@@ -94,9 +95,9 @@ export class TikTokenizer {
     specialTokensEncoder: ReadonlyMap<string, number>,
     regexPattern: string
   ): void {
-    this.encoder = new Map<string, number>();
+    this.encoder = new BinaryMap();
     for (const [key, value] of bpeDict) {
-      this.encoder.set(uint8ArrayToString(key), value);
+      this.encoder.set(key, value);
     }
     this.regex = new RegExp(regexPattern, "gu");
     this.specialTokensRegex = new RegExp(
@@ -111,7 +112,7 @@ export class TikTokenizer {
       this.decoder.set(value, key);
     }
 
-    if (this.encoder.size !== this.decoder.size) {
+    if (bpeDict.size !== this.decoder.size) {
       throw new Error("Encoder and decoder sizes do not match");
     }
 
@@ -200,17 +201,18 @@ export class TikTokenizer {
     const substring = text.substring(start, end);
     this.regex!.lastIndex = 0;
     while ((match = this.regex!.exec(substring))) {
-      if (this.cache.has(match[0])) {
-        tokenIds.push(...this.cache.get(match[0])!);
+      const cached = this.cache.get(match[0]);
+      if (cached) {
+        tokenIds.push(...cached);
       } else {
         // cache miss
         const bytes = this.textEncoder.encode(match[0]);
-        const token = this.encoder?.get(uint8ArrayToString(bytes));
+        const token = this.encoder?.get(bytes, 0, this.textEncoder.length);
         if (token !== undefined) {
           tokenIds.push(token);
           this.cache.set(match[0], [token]);
         } else {
-          const encodedTokens = bytePairEncode(bytes, this.encoder!);
+          const encodedTokens = bytePairEncode(bytes, this.encoder!, this.textEncoder.length);
           tokenIds.push(...encodedTokens);
           this.cache.set(match[0], encodedTokens);
         }
@@ -248,7 +250,7 @@ export class TikTokenizer {
       } else {
         // cache miss
         const bytes = this.textEncoder.encode(piece);
-        const token = this.encoder!.get(uint8ArrayToString(bytes));
+        const token = this.encoder!.get(bytes, 0, bytes.length);
         if (token !== undefined) {
           this.cache.set(piece, [token]);
           if (tokenCount + 1 <= maxTokenCount) {
@@ -259,7 +261,7 @@ export class TikTokenizer {
             break;
           }
         } else {
-          const encodedTokens = bytePairEncode(bytes, this.encoder!);
+          const encodedTokens = bytePairEncode(bytes, this.encoder!, this.textEncoder.length);
           this.cache.set(piece, encodedTokens);
           if (tokenCount + encodedTokens.length <= maxTokenCount) {
             tokenCount += encodedTokens.length;
@@ -394,8 +396,8 @@ export class TikTokenizer {
             tokenIds.push(...tokens!);
             tokenCountMap.set(tokenCount, encodeLength);
           } else {
-            const bytes = new TextEncoder().encode(piece);
-            const token = this.encoder!.get(uint8ArrayToString(bytes));
+            const bytes = this.textEncoder.encode(piece);
+            const token = this.encoder!.get(bytes);
             if (token !== undefined) {
               this.cache.set(piece, [token]);
               tokenCount++;
@@ -403,7 +405,7 @@ export class TikTokenizer {
               tokenIds.push(token);
               tokenCountMap.set(tokenCount, encodeLength);
             } else {
-              const encodedTokens = bytePairEncode(bytes, this.encoder!);
+              const encodedTokens = bytePairEncode(bytes, this.encoder!, this.textEncoder.length);
               this.cache.set(piece, encodedTokens);
               tokenCount += encodedTokens.length;
               encodeLength += piece.length;
@@ -473,7 +475,8 @@ export class TikTokenizer {
       } else {
         const specialTokenValue = this.specialTokensDecoder?.get(token);
         if (specialTokenValue !== undefined) {
-          tokenBytes = Array.from(this.textEncoder.encode(specialTokenValue));
+          const bytes = this.textEncoder.encode(specialTokenValue);
+          tokenBytes = Array.from(bytes.subarray(0, this.textEncoder.length));
         }
       }
       decoded.push(...tokenBytes);
