@@ -37,8 +37,5 @@
     "watch": "tsc -p ./tsconfig.json --watch",
     "eslint": "eslint src --ext ts",
     "format": "prettier --write \"./**/*.{ts,tsx}\""
-  },
-  "dependencies": {
-    "lru-cache": "^9.1.1"
   }
 }

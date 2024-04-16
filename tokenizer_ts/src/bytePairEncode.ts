@@ -2,9 +2,12 @@
 // Licensed under the MIT License.
 
 const enum Constant {
-  // we have 48 bits per level, we can safely bitwise encode 32 bits at a time,
-  // so this works in two passes
+  // We have 48 bits per level in the map (Number.MAX_SAFE_INTEGER is 52 bits)
+  // so we bitwise encode 32 bits at a time, working in two passes.
   BytesPerLevel = 6,
+  // Max rank sequences can have during the ranking process. The max int32,
+  // to keep things in integer land.
+  MaxRank = 0x7FFFFFFF
 }
 
 // exported for testing
@@ -77,7 +80,8 @@ export class BinaryMap<V> {
   }
 }
 
-const maxRank = 0x7FFFFFFF; // max int32, try and keep things in integer space
+let ranksBuf = new Int32Array(128);
+let indicesBuf = new Int32Array(128);
 
 /**
  * This function implements the byte pair encoding algorithm.
@@ -94,61 +98,77 @@ export function bytePairEncode(
     return [ranks.get(mergingBytes)!];
   }
 
-  let minRank = maxRank;
+  let minRank = Constant.MaxRank;
   let minIndex = -1;
+  while (ranksBuf.length < length * 2) {
+    indicesBuf = new Int32Array(indicesBuf.length * 2);
+    ranksBuf = new Int32Array(ranksBuf.length * 2);
+  }
 
-  const byteIndicesAndRanks: [number, number][] = [];
   for (let i = 0; i < length - 1; i++) {
-    const rank = ranks.get(mergingBytes, i, i + 2) ?? maxRank;
+    const rank = ranks.get(mergingBytes, i, i + 2) ?? Constant.MaxRank;
     if (rank < minRank) {
       minRank = rank;
       minIndex = i;
     }
 
-    byteIndicesAndRanks.push([i, rank]);
+    indicesBuf[i] = i;
+    ranksBuf[i] = rank;
   }
-  byteIndicesAndRanks.push([length - 1, maxRank]);
-  byteIndicesAndRanks.push([length, maxRank]);
+
+  indicesBuf[length - 1] = length - 1;
+  ranksBuf[length - 1] = Constant.MaxRank;
+  indicesBuf[length] = length;
+  ranksBuf[length] = Constant.MaxRank;
+
+  let maxIndex = length + 1;
 
   function getRank(startIndex: number, skip = 0): number {
-    if (startIndex + skip + 2 < byteIndicesAndRanks.length) {
+    if (startIndex + skip + 2 < maxIndex) {
       const rank = ranks.get(
         mergingBytes,
-        byteIndicesAndRanks[startIndex][0],
-        byteIndicesAndRanks[startIndex + skip + 2][0]
+        indicesBuf[startIndex],
+        indicesBuf[startIndex + skip + 2]
       );
       if (rank !== undefined) {
         return rank;
       }
     }
-    return maxRank;
+    return Constant.MaxRank;
   }
 
-  while (minRank !== maxRank) {
-    byteIndicesAndRanks[minIndex][1] = getRank(minIndex, 1);
+  while (minRank !== Constant.MaxRank) {
+    ranksBuf[indicesBuf[minIndex]] = getRank(minIndex, 1);
     if (minIndex > 0) {
-      byteIndicesAndRanks[minIndex - 1][1] = getRank(minIndex - 1, 1);
+      ranksBuf[indicesBuf[minIndex - 1]] = getRank(minIndex - 1, 1);
     }
-    byteIndicesAndRanks.splice(minIndex + 1, 1);
+
+    // splice minIndex+1 out of the array. On Node 20, this was tested to be
+    // faster than `indicesBuf.set(indicesBuf.subarray(...`
+    for (let i = minIndex + 1; i < maxIndex - 1; i++) {
+      indicesBuf[i] = indicesBuf[i + 1];
+    }
+    maxIndex--;
 
 
     minIndex = -1;
-    minRank = maxRank;
-    for (let i = 0; i < byteIndicesAndRanks.length - 1; i++) {
-      if (byteIndicesAndRanks[i][1] < minRank) {
-        minRank = byteIndicesAndRanks[i][1];
+    minRank = Constant.MaxRank;
+    for (let i = 0; i < maxIndex - 1; i++) {
+      const rank = ranksBuf[indicesBuf[i]];
+      if (ranksBuf[indicesBuf[i]] < minRank) {
+        minRank = rank;
         minIndex = i;
       }
     }
   }
 
   const outList: number[] = [];
-  for (let i = 0; i < byteIndicesAndRanks.length - 1; i++) {
+  for (let i = 0; i < maxIndex - 1; i++) {
     outList.push(
       ranks.get(
         mergingBytes,
-        byteIndicesAndRanks[i][0],
-        byteIndicesAndRanks[i + 1][0]
+        indicesBuf[i],
+        indicesBuf[i + 1]
       )!
     );
   }
