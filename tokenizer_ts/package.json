@@ -34,6 +34,7 @@
   "scripts": {
     "test": "mocha -u tdd --require ts-node/register test/**/*.ts",
     "build": "tsc -p ./tsconfig.json",
+    "watch": "tsc -p ./tsconfig.json --watch",
     "eslint": "eslint src --ext ts",
     "format": "prettier --write \"./**/*.{ts,tsx}\""
   },
