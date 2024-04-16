@@ -87,9 +87,10 @@ const maxRank = 0x7FFFFFFF; // max int32, try and keep things in integer space
  */
 export function bytePairEncode(
   mergingBytes: Uint8Array,
-  ranks: BinaryMap<number>
+  ranks: BinaryMap<number>,
+  length: number,
 ): number[] {
-  if (mergingBytes.length === 1) {
+  if (length === 1) {
     return [ranks.get(mergingBytes)!];
   }
 
@@ -97,7 +98,7 @@ export function bytePairEncode(
   let minIndex = -1;
 
   const byteIndicesAndRanks: [number, number][] = [];
-  for (let i = 0; i < mergingBytes.length - 1; i++) {
+  for (let i = 0; i < length - 1; i++) {
     const rank = ranks.get(mergingBytes, i, i + 2) ?? maxRank;
     if (rank < minRank) {
       minRank = rank;
@@ -106,8 +107,8 @@ export function bytePairEncode(
 
     byteIndicesAndRanks.push([i, rank]);
   }
-  byteIndicesAndRanks.push([mergingBytes.length - 1, maxRank]);
-  byteIndicesAndRanks.push([mergingBytes.length, maxRank]);
+  byteIndicesAndRanks.push([length - 1, maxRank]);
+  byteIndicesAndRanks.push([length, maxRank]);
 
   function getRank(startIndex: number, skip = 0): number {
     if (startIndex + skip + 2 < byteIndicesAndRanks.length) {
