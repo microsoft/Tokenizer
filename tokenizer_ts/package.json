@@ -2,7 +2,7 @@
   "name": "@microsoft/tiktokenizer",
   "displayName": "tiktokenizer",
   "description": "Tokenizer for OpenAI large language models.",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "author": {
     "name": "Microsoft Corporation"
   },

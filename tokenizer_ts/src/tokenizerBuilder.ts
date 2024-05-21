@@ -7,12 +7,15 @@ import { TikTokenizer } from "./tikTokenizer";
 
 const MODEL_PREFIX_TO_ENCODING: ReadonlyMap<string, string> = new Map([
   // chat
+  ["gpt-4o-", "o200k_base"],  // e.g., gpt-4o-2024-05-13
   ["gpt-4-", "cl100k_base"], // e.g., gpt-4-0314, etc., plus gpt-4-32k
-  ["gpt-3.5-turbo-", "cl100k_base"] // e.g, gpt-3.5-turbo-0301, -0401, etc.
+  ["gpt-3.5-turbo-", "cl100k_base"], // e.g, gpt-3.5-turbo-0301, -0401, etc.
+  ["gpt-35-turbo-", "cl100k_base"] // Azure deployment name
 ]);
 
 export const MODEL_TO_ENCODING: ReadonlyMap<string, string> = new Map([
   // chat
+  ["gpt-4o", "o200k_base"],
   ["gpt-4", "cl100k_base"],
   ["gpt-3.5-turbo", "cl100k_base"],
   // text
@@ -71,6 +74,22 @@ const REGEX_PATTERN_1: string =
 const REGEX_PATTERN_2: string =
   "(?:'s|'S|'t|'T|'re|'RE|'Re|'eR|'ve|'VE|'vE|'Ve|'m|'M|'ll|'lL|'Ll|'LL|'d|'D)|[^\\r\\n\\p{L}\\p{N}]?\\p{L}+|\\p{N}{1,3}| ?[^\\s\\p{L}\\p{N}]+[\\r\\n]*|\\s*[\\r\\n]+|\\s+(?!\\S)|\\s+";
 
+
+/*
+ * regex pattern used for gpt-4o
+ */
+const patterns: string[] = [
+  `[^\r\n\\p{L}\\p{N}]?[\\p{Lu}\\p{Lt}\\p{Lm}\\p{Lo}\\p{M}]*[\\p{Ll}\\p{Lm}\\p{Lo}\\p{M}]+(?:'s|'S|'t|'T|'re|'RE|'Re|'eR|'ve|'VE|'vE|'Ve|'m|'M|'ll|'lL|'Ll|'LL|'d|'D)?`,
+  `[^\r\n\\p{L}\\p{N}]?[\\p{Lu}\\p{Lt}\\p{Lm}\\p{Lo}\\p{M}]+[\\p{Ll}\\p{Lm}\\p{Lo}\\p{M}]*(?:'s|'S|'t|'T|'re|'RE|'Re|'eR|'ve|'VE|'vE|'Ve|'m|'M|'ll|'lL|'Ll|'LL|'d|'D)?`,
+  `\\p{N}{1,3}`,
+  ` ?[^\\s\\p{L}\\p{N}]+[\\r\\n/]*`,
+  `\\s*[\\r\\n]+`,
+  `\\s+(?!\\S)`,
+  `\\s+`,
+];
+
+const REGEX_PATTERN_3: string = patterns.join("|");
+
 function getEncoderFromModelName(modelName: string): string {
   let encoder = "";
   if (!MODEL_TO_ENCODING.has(modelName)) {
@@ -112,6 +131,12 @@ export function getSpecialTokensByEncoder(
 ): Map<string, number> {
   let specialTokens: Map<string, number> = new Map([[ENDOFTEXT, 50256]]);
   switch (encoder) {
+    case "o200k_base":
+      specialTokens = new Map([
+        [ENDOFTEXT, 199999],
+        [ENDOFPROMPT, 200018]
+      ]);
+      break;
     case "cl100k_base":
       specialTokens = new Map([
         [ENDOFTEXT, 100257],
@@ -157,6 +182,8 @@ export function getSpecialTokensByModel(
  */
 export function getRegexByEncoder(encoder: string): string {
   switch (encoder) {
+    case "o200k_base":
+      return REGEX_PATTERN_3;
     case "cl100k_base":
       return REGEX_PATTERN_2;
     default:
@@ -208,6 +235,10 @@ export async function createByEncoderName(
   );
 
   switch (encoderName) {
+    case "o200k_base":
+      regexPattern = REGEX_PATTERN_3;
+      mergeableRanksFileUrl = `https://openaipublic.blob.core.windows.net/encodings/o200k_base.tiktoken`;
+      break;
     case "cl100k_base":
       regexPattern = REGEX_PATTERN_2;
       mergeableRanksFileUrl = `https://openaipublic.blob.core.windows.net/encodings/cl100k_base.tiktoken`;
