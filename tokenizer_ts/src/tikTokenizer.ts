@@ -73,19 +73,19 @@ export class TikTokenizer {
    * Take the encoder tokens mapping from OpenAI tiktoken dump to build the encoder
    * For gpt-3.5-turbo/gpt4, you can download the BPE tokens mapping from:
    * https://openaipublic.blob.core.windows.net/encodings/cl100k_base.tiktoken
-   * @param tikTokenBpeFile BPE rank file path
+   * @param tikTokenBpeFileOrDict BPE rank file path or parsed dictionary
    * @param specialTokensEncoder special tokens encoder
    * @param regexPattern regex pattern to split the input text
    * @param cacheSize cache size
    */
   constructor(
-    tikTokenBpeFile: string,
+    tikTokenBpeFileOrDict: string | Map<Uint8Array, number>,
     specialTokensEncoder: ReadonlyMap<string, number>,
     regexPattern: string,
     cacheSize: number = 8192
   ) {
     this.cache = new LRUCache(cacheSize);
-    const bpeDict = loadTikTokenBpe(tikTokenBpeFile);
+    const bpeDict = typeof tikTokenBpeFileOrDict === 'string' ? loadTikTokenBpe(tikTokenBpeFileOrDict) : tikTokenBpeFileOrDict;
     this.init(bpeDict, specialTokensEncoder, regexPattern);
   }
 
