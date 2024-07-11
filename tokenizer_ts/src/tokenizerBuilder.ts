@@ -257,7 +257,7 @@ export async function createByEncoderName(
       break;
     case "gpt2":
       regexPattern = REGEX_PATTERN_1;
-      mergeableRanksFileUrl = `https://pythia.blob.core.windows.net/public/encoding/gpt2.tiktoken`;
+      mergeableRanksFileUrl = `https://github.com/microsoft/Tokenizer/blob/main/model/gpt2.tiktoken`;
       break;
     default:
       throw new Error(`Doesn't support this encoder [${encoderName}]`);

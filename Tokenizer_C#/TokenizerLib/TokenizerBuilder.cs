@@ -165,7 +165,7 @@ namespace Microsoft.DeepDev
                     return await CreateTokenizerAsync(regexPatternStr, mergeableRanksFileUrl, specialTokens);
                 case "gpt2":
                     regexPatternStr = @"'s|'t|'re|'ve|'m|'ll|'d| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+";
-                    mergeableRanksFileUrl = @"https://pythia.blob.core.windows.net/public/encoding/gpt2.tiktoken";
+                    mergeableRanksFileUrl = @"https://github.com/microsoft/Tokenizer/blob/main/model/gpt2.tiktoken";
                     specialTokens = new Dictionary<string, int>{
                                             { ENDOFTEXT, 50256 },
                                         };
