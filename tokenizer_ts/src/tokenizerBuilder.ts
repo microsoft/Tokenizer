@@ -285,20 +285,20 @@ export async function createByEncoderName(
 
 /**
  * Create a tokenizer from a file
- * @param tikTokenBpeFile BPE rank file in tiktoken format
+ * @param tikTokenBpeFileOrDict BPE rank file in tiktoken format or parsed dictionary
  * @param specialTokensEncoder special tokens mapping
  * @param regexPattern regex pattern
  * @param cacheSize cache size
  * @returns TikTokenizer tokenizer
  */
 export function createTokenizer(
-  tikTokenBpeFile: string,
+  tikTokenBpeFileOrDict: string | Map<Uint8Array, number>,
   specialTokensEncoder: ReadonlyMap<string, number>,
   regexPattern: string,
   cacheSize: number = 8192
 ): TikTokenizer {
   const tikTokenizer = new TikTokenizer(
-    tikTokenBpeFile,
+    tikTokenBpeFileOrDict,
     specialTokensEncoder,
     regexPattern,
     cacheSize
