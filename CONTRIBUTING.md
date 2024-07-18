@@ -51,7 +51,7 @@ Please adhere to Microsoft's [C# Coding Conventions](https://docs.microsoft.com/
 
 ### Typescript
 
-In tokenizer_ts folder using following command for formating and linting:
+In tokenizer_ts folder using following command for formatting and linting:
 
 ```bash
 npm run format
