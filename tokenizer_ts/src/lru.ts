@@ -45,6 +45,8 @@ export class LRUCache<T> {
 
   private moveToHead(node: Node<T>): void {
     this.removeNode(node);
+    node.next = undefined;
+    node.prev = undefined;
     this.addNode(node);
   }
 
