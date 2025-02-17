@@ -304,5 +304,27 @@ namespace TokenizerTest
             Assert.AreEqual(text, decoded);
         }
 
+        [TestMethod]
+        public void TestCountR50kbbase()
+        {
+            var text = File.ReadAllText("./testData/lib.rs.txt");
+            var count = Tokenizer_r50k_base.Count(text, new HashSet<string>());
+            Assert.AreEqual(11378, count);
+        }
+
+        [TestMethod]
+        public void TestCountR50kbbaseSetMaxTokens()
+        {
+            var text = File.ReadAllText("./testData/lib.rs.txt");
+            var count = Tokenizer_r50k_base.Count(text, new HashSet<string>(), 10000);
+            Assert.AreEqual(10000, count);
+        }
+
+        [TestMethod]
+        public void TestCount0Tokens()
+        {
+            var count = Tokenizer_r50k_base.Count("", new HashSet<string>());
+            Assert.AreEqual(0, count);
+        }
     }
 }

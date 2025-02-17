@@ -602,6 +602,99 @@ namespace Microsoft.DeepDev
 
             return Encoding.UTF8.GetString(decoded.ToArray());
         }
-    }
 
+        public int Count(string text, bool applySpecialTokens = true, int max = int.MaxValue)
+        {
+            if (applySpecialTokens && SpecialTokens.Count > 0)
+            {
+                return CountInternal(text, SpecialTokens, max);
+            }
+
+            return CountTokens(text, max);
+        }
+
+        public int Count(string text, IReadOnlyCollection<string> allowedSpecial, int max = int.MaxValue)
+        {
+            if (allowedSpecial is null || allowedSpecial.Count == 0)
+            {
+                return CountTokens(text, max);
+            }
+
+            return CountInternal(text, allowedSpecial, max);
+        }
+
+        private int CountInternal(string text, IReadOnlyCollection<string> allowedSpecial, int max)
+        {
+            int tokenCount = 0;
+            int start = 0;
+            while (true)
+            {
+                Match nextSpecial;
+                int end;
+                FindNextSpecialToken(text, allowedSpecial, start, out nextSpecial, out end);
+                if (end > start)
+                {
+                    tokenCount += CountTokens(text[start..end], max - tokenCount);
+                    if (tokenCount >= max)
+                    {
+                        return max;
+                    }
+                }
+
+                if (nextSpecial.Success)
+                {
+                    tokenCount++;
+                    if (tokenCount >= max)
+                    {
+                        return max;
+                    }
+                    start = nextSpecial.Index + nextSpecial.Length;
+                    if (start >= text.Length)
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return tokenCount;
+        }
+
+        private int CountTokens(string text, int max)
+        {
+            int tokenCount = 0;
+            foreach (Match match in Regex.Matches(text))
+            {
+                var piece = match.Value;
+                if (this.Cache.Lookup(piece, out int[] tokens))
+                {
+                    tokenCount += tokens.Length;
+                }
+                else
+                {
+                    var bytes = Encoding.UTF8.GetBytes(match.Value);
+                    if (Encoder.TryGetValue(bytes, out int token))
+                    {
+                        tokenCount++;
+                    }
+                    else
+                    {
+                        var encodedTokens = BytePairEncoder.BytePairEncode(bytes, Encoder);
+                        this.Cache.Add(piece, encodedTokens.ToArray());
+                        tokenCount += encodedTokens.Count;
+                    }
+                }
+
+                if (tokenCount >= max)
+                {
+                    return max;
+                }
+            }
+
+            return tokenCount;
+        }
+    }
 }
