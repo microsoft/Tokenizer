@@ -33,7 +33,7 @@ namespace Microsoft.DeepDev
         /// </summary>
         public const int DefaultCacheSize = 4096;
 
-        private readonly LruCache<string, int[]> Cache;
+        private readonly LruCache<string, List<int>> Cache;
 
         public int NumOfCacheEntries => this.Cache.Count;
 
@@ -47,7 +47,7 @@ namespace Microsoft.DeepDev
         /// <param name="pattern">Regex pattern to break a string to be encoded</param>
         public TikTokenizer(IReadOnlyDictionary<byte[], int> encoder, IReadOnlyDictionary<string, int> specialTokensEncoder, string pattern, int cacheSize = DefaultCacheSize)
         {
-            Cache = new LruCache<string, int[]>(cacheSize);
+            Cache = new LruCache<string, List<int>>(cacheSize);
             Init(encoder, specialTokensEncoder, pattern);
         }
 
@@ -59,7 +59,7 @@ namespace Microsoft.DeepDev
         /// <param name="pattern">Regex pattern to break a string to be encoded</param>
         public TikTokenizer(Stream tikTokenBpeFileStream, IReadOnlyDictionary<string, int> specialTokensEncoder, string pattern, int cacheSize = DefaultCacheSize)
         {
-            Cache = new LruCache<string, int[]>(cacheSize);
+            Cache = new LruCache<string, List<int>>(cacheSize);
             var encoder = LoadTikTokenBpe(tikTokenBpeFileStream);
             Init(encoder, specialTokensEncoder, pattern);
         }
@@ -251,7 +251,7 @@ namespace Microsoft.DeepDev
         {
             foreach (Match match in Regex.Matches(text[start..end]))
             {
-                if (this.Cache.Lookup(match.Value, out int[] tokens))
+                if (this.Cache.Lookup(match.Value, out List<int> tokens))
                 {
                     tokenIds.AddRange(tokens);
                 }
@@ -267,7 +267,7 @@ namespace Microsoft.DeepDev
                     {
                         var encodedTokens = BytePairEncoder.BytePairEncode(bytes, Encoder);
                         tokenIds.AddRange(encodedTokens);
-                        this.Cache.Add(match.Value, encodedTokens.ToArray());
+                        this.Cache.Add(match.Value, encodedTokens);
                     }
                 }
             }
@@ -290,9 +290,9 @@ namespace Microsoft.DeepDev
             foreach (Match match in Regex.Matches(text[start..end]))
             {
                 var piece = match.Value;
-                if (this.Cache.Lookup(piece, out int[] tokens))
+                if (this.Cache.Lookup(piece, out List<int> tokens))
                 {
-                    tokenCount += tokens.Length;
+                    tokenCount += tokens.Count;
                     if (tokenCount <= maxTokenCount)
                     {
                         encodeLength += piece.Length;
@@ -323,7 +323,7 @@ namespace Microsoft.DeepDev
                     else
                     {
                         var encodedTokens = BytePairEncoder.BytePairEncode(bytes, Encoder);
-                        this.Cache.Add(piece, encodedTokens.ToArray());
+                        this.Cache.Add(piece, encodedTokens);
                         tokenCount += encodedTokens.Count;
                         if (tokenCount <= maxTokenCount)
                         {
@@ -505,9 +505,9 @@ namespace Microsoft.DeepDev
             {
                 var piece = match.Value;
 
-                if (this.Cache.Lookup(match.Value, out int[] tokens))
+                if (this.Cache.Lookup(match.Value, out List<int> tokens))
                 {
-                    tokenCount += tokens.Length;
+                    tokenCount += tokens.Count;
                     encodeLength += piece.Length;
                     tokenIds.AddRange(tokens);
                     tokenCountMap[tokenCount] = encodeLength;
@@ -526,7 +526,7 @@ namespace Microsoft.DeepDev
                     else
                     {
                         var encodedTokens = BytePairEncoder.BytePairEncode(bytes, Encoder);
-                        this.Cache.Add(piece, encodedTokens.ToArray());
+                        this.Cache.Add(piece, encodedTokens);
                         tokenCount += encodedTokens.Count;
                         encodeLength += piece.Length;
                         tokenIds.AddRange(encodedTokens);
@@ -669,9 +669,9 @@ namespace Microsoft.DeepDev
             foreach (Match match in Regex.Matches(text))
             {
                 var piece = match.Value;
-                if (this.Cache.Lookup(piece, out int[] tokens))
+                if (this.Cache.Lookup(piece, out List<int> tokens))
                 {
-                    tokenCount += tokens.Length;
+                    tokenCount += tokens.Count;
                 }
                 else
                 {
@@ -683,7 +683,7 @@ namespace Microsoft.DeepDev
                     else
                     {
                         var encodedTokens = BytePairEncoder.BytePairEncode(bytes, Encoder);
-                        this.Cache.Add(piece, encodedTokens.ToArray());
+                        this.Cache.Add(piece, encodedTokens);
                         tokenCount += encodedTokens.Count;
                     }
                 }
