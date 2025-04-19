@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import * as fs from "fs";
-import * as path from "path";
 import { TikTokenizer } from "./tikTokenizer";
 
 const MODEL_PREFIX_TO_ENCODING: ReadonlyMap<string, string> = new Map([
@@ -109,6 +107,7 @@ async function fetchAndSaveFile(
   mergeableRanksFileUrl: string,
   filePath: string
 ): Promise<void> {
+  const fs = require("fs"); // Defer loading the node fs module for browser compatibility
   const response = await fetch(mergeableRanksFileUrl);
 
   if (!response.ok) {
@@ -267,6 +266,9 @@ export async function createByEncoderName(
     specialTokens = new Map([...specialTokens, ...extraSpecialTokens]);
   }
 
+  // Defer loading the node fs and path modules for browser compatibility
+  const fs = require("fs");
+  const path = require("path");
   const fileName = path.basename(mergeableRanksFileUrl);
   const dirPath = path.resolve(__dirname, "..", "model");
   // Create the directory if it doesn't exist
