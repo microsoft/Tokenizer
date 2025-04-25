@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import * as fs from "fs";
-import { TextDecoder } from "util";
 import { BinaryMap, bytePairEncode } from "./bytePairEncode";
 import { makeTextEncoder } from './textEncoder';
 import { ILRUCache, LRUCache } from './lru';
@@ -15,6 +13,7 @@ import { ILRUCache, LRUCache } from './lru';
 function loadTikTokenBpe(tikTokenBpeFile: string): Map<Uint8Array, number> {
   const bpeDict = new Map<Uint8Array, number>();
   try {
+    const fs = require("fs"); // Defer loading the node fs module for browser compatibility
     const fileContent = fs.readFileSync(tikTokenBpeFile, "utf-8");
     processBpeRanks(fileContent);
     return bpeDict;
