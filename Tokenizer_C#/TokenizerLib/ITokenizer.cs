@@ -43,5 +43,15 @@ namespace Microsoft.DeepDev
         /// Decode an array of integer token ids
         /// </summary>
         public string Decode(int[] tokens);
+
+        /// <summary>
+        /// Count a string with or without special tokens set through constructor.
+        /// </summary>
+        public int Count(string text, bool applySpecialTokens = true, int max = int.MaxValue);
+
+        /// <summary>
+        /// Count a string with a set of allowed special tokens that are not broken apart.
+        /// </summary>
+        public int Count(string text, IReadOnlyCollection<string> allowedSpecial, int max = int.MaxValue); 
     }
 }
